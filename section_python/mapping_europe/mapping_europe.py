@@ -21,8 +21,8 @@ import tifffile
 
 # In[2]:
 
-
-im = tifffile.imread(r"C:\Users\lcube\Desktop\project_data\eu_dem_v11_E40N30\eu_dem_v11_E40N30.TIF")
+file_path = r"..\..\..\big_data\eu_dem_v11_E40N30\eu_dem_v11_E40N30.TIF"
+im = tifffile.imread(file_path)
 # print(np.shape(im))
 
 
