@@ -1,0 +1,5 @@
+\begindata
+KERNELS_TO_LOAD=(
+'C:\Users\lcube\Desktop\arduino\planets\kernels\de430.bsp'
+'C:\Users\lcube\Desktop\arduino\planets\kernels\naif0012.tls')
+\begintext
