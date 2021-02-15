@@ -12,7 +12,7 @@ def check_quit(user_input):
 
 class Kniffel(object):
 
-    def __init__(self):
+    def __init__(self, welcome=True):
         self.dice_num = 5
         self.value_fullhouse = 25
         self.value_smallstraight = 30
@@ -27,7 +27,13 @@ class Kniffel(object):
         self.block_status = {}
         for b in self.boxes:
             self.block_status[b] =  None
-    
+            
+        if welcome == True:
+            print('')
+            print('Welcome to Kniffel (aka Yahtzee).')
+            print('The goal is to replace dice and obtain pairs.')
+            print('Best of luck!')
+            
     def Category(self, dice, box):
     
         # section == 'upper'
@@ -108,6 +114,8 @@ class Kniffel(object):
         dice = np.append(dice, new_dice)
         return dice
         
+    # player selection section    
+        
     def PlayerRoll(self, dice, roll_num):
         print('')
         print('Roll #{}: {}'.format(roll_num,dice))
@@ -170,24 +178,22 @@ class Kniffel(object):
         for key in self.block_status:
             print('{} - {}'.format(key,self.block_status[key]))
         print('------------')      
-
-    
-game = Kniffel()
-
-while None in game.block_status.values():
-    dice = game.PlayerRoll(game.InitialRoll(), 1)  # move 1
-    dice = game.PlayerRoll(dice, 2)                # move 2
-    game.PlayerBox(dice)                           # box choice
-
-score = sum(filter(None, game.block_status.values()))
-
-print('************')
-print(' Game Over ')
-print(' Score : {} '.format(score))
-print('************')
-
-
-
-
-
+        
+    # computer selection section    
+        
+    def ComputerRoll(self, dice, roll_num):
+        switch = np.random.choice(dice, np.random.randint(0, self.dice_num+1), replace=False)
+        switch = ' '.join(map(str, switch))
+        new_dice = self.Replace(dice, switch)
+        return new_dice
+        
+    def ComputerBox(self, dice):
+        keys = self.block_status.keys()
+        valid_box = [key for key in keys if self.block_status[key] == None]
+        box = np.random.choice(valid_box)
+        result = self.Category(dice, box)
+        if result[1] == None:
+            self.block_status[box] = 0
+        else:
+            self.block_status[box] = result[1]
 
