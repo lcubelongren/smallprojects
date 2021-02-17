@@ -3,8 +3,6 @@
 # .exe is generated using pyinstaller
 
 import game_copy as game
-import numpy as np
-import matplotlib.pyplot as plt
 
 
 def PlayerGame(game):
