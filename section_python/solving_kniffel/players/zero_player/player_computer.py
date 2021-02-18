@@ -22,13 +22,13 @@ def ComputerGame(game, welcome=False):
     
     
 if __name__ == '__main__':
-    num = int(1e3)
+    num = int(5e5)
     scores = np.zeros(num)
     for i in range(num):
         scores[i] = ComputerGame(game)
     print('mean score: ', np.mean(scores))
     
-    plt.hist(scores, density=False, color='k')
+    plt.hist(scores, 500, density=False, color='k')
     plt.title('game num = {}'.format(num))
     plt.xlabel('score')
     plt.ylabel('number (density)')
