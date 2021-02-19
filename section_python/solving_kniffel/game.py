@@ -4,6 +4,7 @@
 import sys
 import numpy as np
 from scipy import stats
+from collections import Counter
 
 
 def check_quit(user_input):
@@ -28,6 +29,8 @@ class Kniffel(object):
         self.block_status = {}
         for b in self.boxes:
             self.block_status[b] =  None
+            
+        self.dice_memory = {}
             
         if welcome == True:
             print('')
@@ -176,12 +179,14 @@ class Kniffel(object):
     # computer selection section    
         
     def ComputerRoll_Random(self, dice, roll_num):
+        """rolling randomly"""
         switch = np.random.choice(dice, np.random.randint(0, self.dice_num+1), replace=False)
         switch = ' '.join(map(str, switch))
         new_dice = self.Replace(dice, switch)
         return new_dice
         
     def ComputerRoll_Pairs(self, dice, roll_num):
+        """keep number with highest occurrence"""
         if len(np.unique(dice)) != self.dice_num:
             mode, count = stats.mode(dice)
             switch = [x for x in dice if x != mode[0]]
@@ -192,6 +197,7 @@ class Kniffel(object):
         return new_dice
         
     def ComputerBox_Random(self, dice):
+        """choose box randomly"""
         keys = self.block_status.keys()
         valid_box = [key for key in keys if self.block_status[key] == None]
         box = np.random.choice(valid_box)
@@ -202,6 +208,7 @@ class Kniffel(object):
             self.block_status[box] = result[1]
             
     def ComputerBox_Max(self, dice):
+        """choose box with highest score"""
         keys = self.block_status.keys()
         valid_box_result = [(key, self.Category(dice, box=key)[1]) for key in keys if self.block_status[key] == None]
         valid_box_result = [v for v in valid_box_result if v[1] != None]
@@ -212,4 +219,49 @@ class Kniffel(object):
         else:
             box, result = max(valid_box_result, key=lambda x: x[1])
             self.block_status[box] = result
+            
+    # letting the computer learn
+    
+    def ComputerRoll_Train(self, dice, dice_past, roll_num):
+        dice = np.sort(dice)  
+
+        if roll_num == 1:
+            if tuple(dice) in self.dice_memory.keys():
+                switch = np.random.choice(dice, np.random.randint(0, self.dice_num+1), replace=False)
+            else:
+                switch = np.random.choice(dice, np.random.randint(0, self.dice_num+1), replace=False) 
+            
+        elif roll_num == 2:
+            if tuple(dice_past) in self.dice_memory.keys():
+                if tuple(dice) in self.dice_memory[tuple(dice_past)].keys():
+                    dice_max = max(self.dice_memory[tuple(dice_past)][tuple(dice)])
+                    diff = Counter(dice) - Counter(dice_max)
+                    switch = list(diff.elements())
+                else:
+                    switch = np.random.choice(dice, np.random.randint(0, self.dice_num+1), replace=False)
+            else:
+                switch = np.random.choice(dice, np.random.randint(0, self.dice_num+1), replace=False) 
+                
+        else:
+            switch = np.random.choice(dice, np.random.randint(0, self.dice_num+1), replace=False)
+            
+        switch = ' '.join(map(str, switch))
+        new_dice = self.Replace(dice, switch)
+        return np.sort(new_dice)
+        
+    def ComputerBox_Train(self, dice):
+        keys = self.block_status.keys()
+        valid_box_result = [(key, self.Category(dice, box=key)[1]) for key in keys if self.block_status[key] == None]
+        valid_box_result = [v for v in valid_box_result if v[1] != None]
+        if len(valid_box_result) == 0:
+            valid_box = [key for key in keys if self.block_status[key] == None]
+            box = np.random.choice(valid_box)
+            self.block_status[box] = 0
+            return 0
+        else:
+            box, result = max(valid_box_result, key=lambda x: x[1])
+            self.block_status[box] = result
+            return result
+            
+    
 

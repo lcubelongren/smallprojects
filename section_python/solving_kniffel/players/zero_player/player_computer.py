@@ -1,5 +1,5 @@
 
-# the computer agent, starting with completely random
+# the dumb computer agent
 
 import sys, os
 sys.path.append(os.path.abspath(os.path.join('..','..','..','solving_kniffel')))
@@ -34,18 +34,6 @@ def ComputerGame1(game, welcome=False):  # mean after 1k games: 115
     return score
     
 def ComputerGame2(game, welcome=False):  # mean after 1k games: 137
-    """keep dice pairs, maximum box result"""
-    game = game.Kniffel(welcome)
-
-    while None in game.block_status.values():
-        dice = game.ComputerRoll_Pairs(game.InitialRoll(), 1)  # move 1
-        dice = game.ComputerRoll_Pairs(dice, 2)                # move 2
-        game.ComputerBox_Max(dice)                             # box choice
-        
-    score = sum(game.block_status.values())
-    return score
-    
-def ComputerGame3(game, welcome=False):  # mean after 1k games: NA
     """keep dice pairs, maximum box result"""
     game = game.Kniffel(welcome)
 
