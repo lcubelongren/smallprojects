@@ -170,24 +170,17 @@ class Kniffel(object):
         if result[1] == None:
             self.block_status[box] = 0
         else:
-            self.block_status[box] = result[1]
-        
-        print('')
-        print('Your scoresheet')
-        print('------------')
-        for key in self.block_status:
-            print('{} - {}'.format(key,self.block_status[key]))
-        print('------------')      
+            self.block_status[box] = result[1]    
         
     # computer selection section    
         
-    def ComputerRoll(self, dice, roll_num):
+    def ComputerRoll_Random(self, dice, roll_num):
         switch = np.random.choice(dice, np.random.randint(0, self.dice_num+1), replace=False)
         switch = ' '.join(map(str, switch))
         new_dice = self.Replace(dice, switch)
         return new_dice
         
-    def ComputerBox(self, dice):
+    def ComputerBox_Random(self, dice):
         keys = self.block_status.keys()
         valid_box = [key for key in keys if self.block_status[key] == None]
         box = np.random.choice(valid_box)
@@ -196,4 +189,16 @@ class Kniffel(object):
             self.block_status[box] = 0
         else:
             self.block_status[box] = result[1]
+            
+    def ComputerBox_Max(self, dice):
+        keys = self.block_status.keys()
+        valid_box_result = [(key, self.Category(dice, box=key)[1]) for key in keys if self.block_status[key] == None]
+        valid_box_result = [v for v in valid_box_result if v[1] != None]
+        if len(valid_box_result) == 0:
+            valid_box = [key for key in keys if self.block_status[key] == None]
+            box = np.random.choice(valid_box)
+            self.block_status[box] = 0
+        else:
+            box, result = max(valid_box_result, key=lambda x: x[1])
+            self.block_status[box] = result
 
