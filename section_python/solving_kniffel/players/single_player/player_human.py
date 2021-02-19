@@ -19,6 +19,11 @@ def PlayerGame(game):
     print(' Game Over ')
     print(' Score : {} '.format(score))
     print('************')
+    print('')
+    
+    input('restart the .exe to play another game')
+    while True:
+        pass
     
     
 if __name__ == '__main__':
