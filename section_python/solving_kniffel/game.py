@@ -3,6 +3,7 @@
 
 import sys
 import numpy as np
+from scipy import stats
 
 
 def check_quit(user_input):
@@ -176,6 +177,16 @@ class Kniffel(object):
         
     def ComputerRoll_Random(self, dice, roll_num):
         switch = np.random.choice(dice, np.random.randint(0, self.dice_num+1), replace=False)
+        switch = ' '.join(map(str, switch))
+        new_dice = self.Replace(dice, switch)
+        return new_dice
+        
+    def ComputerRoll_Pairs(self, dice, roll_num):
+        if len(np.unique(dice)) != self.dice_num:
+            mode, count = stats.mode(dice)
+            switch = [x for x in dice if x != mode[0]]
+        else:
+            switch = np.random.choice(dice, np.random.randint(0, self.dice_num+1), replace=False)
         switch = ' '.join(map(str, switch))
         new_dice = self.Replace(dice, switch)
         return new_dice

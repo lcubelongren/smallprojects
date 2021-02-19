@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def ComputerGame0(game, welcome=False):
+def ComputerGame0(game, welcome=False):  # mean after 1k games: 46
     """everything random"""
     game = game.Kniffel(welcome)
 
@@ -17,11 +17,11 @@ def ComputerGame0(game, welcome=False):
         dice = game.ComputerRoll_Random(game.InitialRoll(), 1)  # move 1
         dice = game.ComputerRoll_Random(dice, 2)                # move 2
         game.ComputerBox_Random(dice)                           # box choice
-        
-    score = sum(filter(None, game.block_status.values()))
+    
+    score = sum(game.block_status.values())
     return score
     
-def ComputerGame1(game, welcome=False):
+def ComputerGame1(game, welcome=False):  # mean after 1k games: 115
     """random dice swapping, maximum box result"""
     game = game.Kniffel(welcome)
 
@@ -30,11 +30,35 @@ def ComputerGame1(game, welcome=False):
         dice = game.ComputerRoll_Random(dice, 2)                # move 2
         game.ComputerBox_Max(dice)                              # box choice
         
-    score = sum(filter(None, game.block_status.values()))
+    score = sum(game.block_status.values())
+    return score
+    
+def ComputerGame2(game, welcome=False):  # mean after 1k games: 137
+    """keep dice pairs, maximum box result"""
+    game = game.Kniffel(welcome)
+
+    while None in game.block_status.values():
+        dice = game.ComputerRoll_Pairs(game.InitialRoll(), 1)  # move 1
+        dice = game.ComputerRoll_Pairs(dice, 2)                # move 2
+        game.ComputerBox_Max(dice)                             # box choice
+        
+    score = sum(game.block_status.values())
+    return score
+    
+def ComputerGame3(game, welcome=False):  # mean after 1k games: NA
+    """keep dice pairs, maximum box result"""
+    game = game.Kniffel(welcome)
+
+    while None in game.block_status.values():
+        dice = game.ComputerRoll_Pairs(game.InitialRoll(), 1)  # move 1
+        dice = game.ComputerRoll_Pairs(dice, 2)                # move 2
+        game.ComputerBox_Max(dice)                             # box choice
+        
+    score = sum(game.block_status.values())
     return score
     
     
-ComputerGameChoice = ComputerGame1
+ComputerGameChoice = ComputerGame2
     
 if __name__ == '__main__':
     num = int(1e3)
