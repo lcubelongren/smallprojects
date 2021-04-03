@@ -227,7 +227,9 @@ class Kniffel(object):
 
         if roll_num == 1:
             if tuple(dice) in self.dice_memory.keys():
-                switch = np.random.choice(dice, np.random.randint(0, self.dice_num+1), replace=False)
+                dice_max = max(self.dice_memory[tuple(dice)])
+                diff = Counter(dice) - Counter(dice_max)
+                switch = list(diff.elements())
             else:
                 switch = np.random.choice(dice, np.random.randint(0, self.dice_num+1), replace=False) 
             
@@ -238,12 +240,11 @@ class Kniffel(object):
                     diff = Counter(dice) - Counter(dice_max)
                     switch = list(diff.elements())
                 else:
-                    switch = np.random.choice(dice, np.random.randint(0, self.dice_num+1), replace=False)
+                    dice_max = max(self.dice_memory[tuple(dice_past)])
+                    diff = Counter(dice) - Counter(dice_max)
+                    switch = list(diff.elements())
             else:
                 switch = np.random.choice(dice, np.random.randint(0, self.dice_num+1), replace=False) 
-                
-        else:
-            switch = np.random.choice(dice, np.random.randint(0, self.dice_num+1), replace=False)
             
         switch = ' '.join(map(str, switch))
         new_dice = self.Replace(dice, switch)
