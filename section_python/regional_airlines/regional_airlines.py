@@ -25,10 +25,12 @@ df = pd.read_csv('data/' + fname)
 # print(df.columns)
 
 
-def fill_airports(data, airline_codes, airline_names):
+def fill_airports(data, airline_dict):
     airports = Airports()  # from import
     df_airports = pd.DataFrame()
-    for code,name in zip(airline_codes,airline_names):
+    for code in airline_dict:
+        name = airline_dict[code][0]
+    
         origin = data['ORIGIN'].where(data['CARRIER'] == code).dropna()
         dest = data['DEST'].where(data['CARRIER'] == code).dropna()
         origin_dest = np.unique([origin, dest])
@@ -57,16 +59,29 @@ def fill_airports(data, airline_codes, airline_names):
     return df_airports
 
 
-# airlines in descending passenger count
-airline_codes = ['OO', 'OH', 'YX', 'MQ', '9E', 'YV', 'QX', 'EV', 'G7']
-airline_names = ['Skywest', 'PSA', 'Republic', 'Envoy', 'Endeavor', 'Mesa', 'Horizon', 'ExpressJet', 'GoJet']
-airline_colors = ['#00529b', '#1b93cd', '#00263a', '#212a86', '#e51937', '#000000', '#00abd2', '#990702', '#0178c1']
-df_airports = fill_airports(df, airline_codes, airline_names)
+airline_dict = {
+'OO': ('SkyWest',       '#00529b', 'circle'), 
+'OH': ('PSA',           '#1b93cd', 'diamond'),
+'YX': ('Republic',      '#00263a', 'triangle-up'),
+'MQ': ('Envoy',         '#212a86', 'triangle-down'),
+'9E': ('Endeavor',      '#e51937', 'triangle-left'),
+'YV': ('Mesa',          '#000000', 'triangle-right'),
+'QX': ('Horizon',       '#00abd2', 'triangle-ne'),
+'G7': ('GoJet',         '#0178c1', 'triangle-se'),
+'ZW': ('Air Wisconsin', '#8f5b6d', 'triangle-sw'),
+'PT': ('Piedmont',      '#d03524', 'triangle-nw')
+}
+color_dict, symbol_dict = {}, {}
+for code in airline_dict:
+    color_dict[airline_dict[code][0]]  = airline_dict[code][1]
+    symbol_dict[airline_dict[code][0]] = airline_dict[code][2]
+
+df_airports = fill_airports(df, airline_dict)
 
 
-def jitter(v=0.05):
+def jitter(v=0.15):
     # jitter points that overlap
-    # supports up to 9 airlines atm
+    # supports up to 10 airlines atm
     df_jitter = pd.DataFrame()
     df_multiple = pd.DataFrame()
     codes = df_airports['code'].unique()
@@ -83,6 +98,9 @@ def jitter(v=0.05):
                 temp['lat'] = temp['lat'].astype(float)
                 temp['lon'] = temp['lon'].astype(float)
                 
+                if j == 10:  # more than 9
+                    temp.loc[temp.index[j], 'lon'] += v
+                    temp.loc[temp.index[j], 'lat'] += 2*v
                 if j%2 == 1 and j != 1:  # left
                     temp.loc[temp.index[j], 'lon'] -= v
                 elif j%2 == 0 and j != 2:  # right
@@ -91,6 +109,7 @@ def jitter(v=0.05):
                     temp.loc[temp.index[j], 'lat'] -= v
                 elif j in [5, 1, 6]:  # top
                     temp.loc[temp.index[j], 'lat'] += v
+                
                 
         df_jitter = df_jitter.append(temp)
         df_multiple = df_multiple.append(temp.loc[0])
@@ -110,12 +129,12 @@ def plotMap(df_airports):
     fig = px.scatter_geo(
         df_airports, lat='lat', lon='lon', 
         hover_data={'code': True, 'city': True, 'lat': False, 'lon': False, 'airline': False, 'flightnum': False},
-        color='airline', color_discrete_sequence=airline_colors,
+        color='airline', color_discrete_map=color_dict, symbol='airline', symbol_map=symbol_dict, opacity=0.8,
         title=title
     )
     fig.update_traces(
         hovertemplate='<b>%{customdata[0]}</b><br>%{customdata[1]}',
-        marker=dict(size=9, line=dict(width=0.5, color='grey'))
+        marker=dict(size=12, line=dict(width=0.5, color='grey'))
     )
     fig.update_geos(
         visible=False, resolution=50, scope='north america', fitbounds='locations',
@@ -124,8 +143,8 @@ def plotMap(df_airports):
     )
     fig.update_layout(
         font=dict(family='Courier New', size=16),
-        legend=dict(title=None, yanchor='top', y=0.99, xanchor='left', x=0.01),
-        legend_title='single click:<br>show/hide item<br><br>double click:<br>single out item<br>'
+        legend=dict(title=None, yanchor='top', y=0.99, xanchor='left', x=0.0, bordercolor='black', borderwidth=1.5),
+        legend_title=' single click:<br> show/hide item<br><br> double click:<br> single out item<br>'
     )
     fig.add_annotation(
                 x=0, y=0, yshift=-60, showarrow=False,
