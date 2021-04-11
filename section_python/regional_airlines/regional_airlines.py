@@ -144,7 +144,7 @@ def plotMap(df_airports):
     fig.update_layout(
         font=dict(family='Courier New', size=16),
         legend=dict(title=None, yanchor='top', y=0.99, xanchor='left', x=0.0, bordercolor='black', borderwidth=1.5),
-        legend_title=' single click:<br> show/hide item<br><br> double click:<br> single out item<br>'
+        legend_title=' <b>Airline Select</b><br> --------------<br> single click:<br> show/hide<br><br> double click:<br> single out<br>'
     )
     fig.add_annotation(
                 x=0, y=0, yshift=-60, showarrow=False,
