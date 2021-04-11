@@ -62,6 +62,7 @@ def fill_airports(data, airline_dict):
 airline_dict = {
 'OO': ('SkyWest',       '#00529b', 'circle'), 
 'OH': ('PSA',           '#1b93cd', 'diamond'),
+'C5': ('CommutAir',     '#aeb3b7', 'pentagon'),
 'YX': ('Republic',      '#00263a', 'triangle-up'),
 'MQ': ('Envoy',         '#212a86', 'triangle-down'),
 '9E': ('Endeavor',      '#e51937', 'triangle-left'),
