@@ -1,5 +1,3 @@
-# projects-self
+# smallprojects
 
-a collection of random things by me;
-
-as seen on my website
+a collection of random things made by me
