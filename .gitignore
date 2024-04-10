@@ -1,0 +1,7 @@
+# ipython cache
+.ipynb_checkpoints
+*/__pycache__
+*.pyc
+
+# Google Takeout
+*/Takeout
