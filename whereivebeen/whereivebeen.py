@@ -41,17 +41,21 @@ def mapping(lats, lons, times):
     ax.add_feature(cartopy.feature.OCEAN, color='grey')
     ax.add_feature(cartopy.feature.LAND, color='black')
     ax.add_feature(cartopy.feature.BORDERS, edgecolor='white', linewidth=0.1)
-    ax.gridlines(xlocs=np.array([-90, 0, 90, 180])-135+twist, ylocs=[], linewidth=0.5)
+    ax.gridlines(xlocs=np.array([-90, 0, 90, 180])-135+twist, ylocs=[], linewidth=0.5, color='w')
     
     timedelta = [(time - times[0]).total_seconds() for time in times]
     plt.scatter(lons, lats, transform=ccrs.PlateCarree(),
                 c=timedelta, s=2, cmap='viridis')
+    
+    plt.tight_layout()
+    plt.savefig('whereivebeen_zoomed.png', transparent=True)
 
-    cbar = plt.colorbar(location='bottom', label='time', fraction=0.09, pad=0.00, aspect=50)
-    cbar.set_ticks(ticks=[timedelta[0], timedelta[-1]], labels=[str(times[0])[:10], str(times[-1])[:10]])
+    cbar = plt.colorbar(location='bottom', fraction=0.09, pad=0.00, aspect=50)
+    cbar.set_ticks(ticks=[timedelta[0], timedelta[-1]], labels=[str(times[0])[:10], str(times[-1])[:10]], color='w')
+    cbar.set_label(label='time', color='w')
 
     plt.tight_layout()
-    plt.savefig('whereivebeen.png')
+    plt.savefig('whereivebeen.png', transparent=True)
 
 
 if __name__ == '__main__':
