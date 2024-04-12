@@ -18,8 +18,8 @@ Taken data with:
 PAX, Distance, Carrier, Origin, Dest, Aircraft Type, Year, Month 
 """
 
-# data taken from: Jan.-Sept., 2020
-drange = 'Jan. to Sept. 2020'
+# data taken from: Jan.-Sep., 2020
+drange = 'Jan. to Sep. 2020'
 fname = '54820610_T_T100_SEGMENT_ALL_CARRIER.csv'
 df = pd.read_csv('data/' + fname)
 # print(df.columns)
@@ -55,7 +55,8 @@ def fill_airports(data, airline_dict):
             except:
                 pass
 
-        df_airports = df_airports.append(df.dropna())
+        #df_airports = df_airports.append(df.dropna())  # deprecated in pandas 2.0
+        df_airports = pd.concat([df_airports, df.dropna()], ignore_index=True)
     return df_airports
 
 
@@ -112,8 +113,10 @@ def jitter(v=0.15):
                     temp.loc[temp.index[j], 'lat'] += v
                 
                 
-        df_jitter = df_jitter.append(temp)
-        df_multiple = df_multiple.append(temp.loc[0])
+        #df_jitter = df_jitter.append(temp)
+        df_jitter = pd.concat([df_jitter, temp], ignore_index=True)
+        #df_multiple = df_multiple.append(temp.loc[0])
+        df_multiple = pd.concat([df_multiple, temp.loc[0]], ignore_index=True)
     df_jitter = df_jitter.reset_index()
     del df_jitter['index']
 
@@ -126,7 +129,7 @@ df_airports, df_multiple  = jitter()
 
 
 def plotMap(df_airports):
-    title = '<b>Regional Airlines</b> - Origin/Destination'
+    title = '<b>US Regional Airlines</b> - Destinations'
     fig = px.scatter_geo(
         df_airports, lat='lat', lon='lon', 
         hover_data={'code': True, 'city': True, 'lat': False, 'lon': False, 'airline': False, 'flightnum': False},
@@ -148,8 +151,12 @@ def plotMap(df_airports):
         legend_title=' <b>Airline Select</b><br> --------------<br> single click:<br> show/hide<br><br> double click:<br> single out<br>'
     )
     fig.add_annotation(
+                x=0, y=0, yshift=-40, showarrow=False,
+                text='Date range: {}'.format(drange)          
+    )
+    fig.add_annotation(
                 x=0, y=0, yshift=-60, showarrow=False,
-                text='Data from the BTS: {}'.format(drange)          
+                text='Data from the Bureau of Transportation Statistics'        
     )
                          
     config = dict({'displayModeBar': True, 'displaylogo': False, 'showTips': False,
