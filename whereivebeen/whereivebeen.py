@@ -55,7 +55,7 @@ def mapping(lats, lons, times):
     cbar.set_label(label='time', color='w')
 
     plt.tight_layout()
-    plt.savefig('whereivebeen.png', transparent=True)
+    plt.savefig('whereivebeen.png', facecolor='black')
 
 
 if __name__ == '__main__':
