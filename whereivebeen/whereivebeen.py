@@ -47,8 +47,8 @@ def mapping(lats, lons, times):
     plt.scatter(lons, lats, transform=ccrs.PlateCarree(),
                 c=timedelta, s=2, cmap='viridis')
     
-    plt.tight_layout()
-    plt.savefig('whereivebeen_zoomed.png', transparent=True)
+    plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
+    plt.savefig('whereivebeen_zoomed.png', transparent=True, bbox_inches='tight')
 
     cbar = plt.colorbar(location='bottom', fraction=0.09, pad=0.00, aspect=50)
     cbar.set_ticks(ticks=[timedelta[0], timedelta[-1]], labels=[str(times[0])[:10], str(times[-1])[:10]], color='w')
