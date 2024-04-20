@@ -19,10 +19,37 @@ body {
 	transform: rotateX(55deg) rotateY(0deg) rotateZ(-45deg);
 }
 
+#counter {
+	position: absolute;
+	transform: translateY(35vmin);
+}
+
+#button {
+	position: absolute;
+	transform: translateY(-35vmin);
+	visibility: hidden;
+}
+
 .tile {
-	border: 1px solid white;
+	border: 0.3vmin solid white;
 }
 .tile-touched {
-	border-color: transparent;
-    box-shadow: 0 0 0 2px #ffa94d;
+	border: 0.3vmin solid black;
+	background-color: #ffa94d;
+}
+.tile-goal {
+	border: 0.3vmin solid white;
+	background-color: green;
+}
+.tile-changing {
+	border: 0.3vmin solid white;
+	background-color: yellow;
+}
+.tile-avoid {
+	border: 0.3vmin solid white;
+	background-color: red;
+}
+.tile-lost {
+	border: 0.3vmin solid black;
+	background-color: white;
 }
