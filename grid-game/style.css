@@ -1,0 +1,28 @@
+
+body {
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-template-rows: 98vh;
+	margin: 0;
+	align-items: center;
+	justify-items: center;
+}
+
+#background {
+	position: absolute;
+	background-color: black;
+	height: 66vmin;
+	width: 66vmin;
+	margin: auto;
+	display: grid;
+	grid-template-columns: repeat(10, 1fr);
+	transform: rotateX(55deg) rotateY(0deg) rotateZ(-45deg);
+}
+
+.tile {
+	border: 1px solid white;
+}
+.tile-touched {
+	border-color: transparent;
+    box-shadow: 0 0 0 2px #ffa94d;
+}
