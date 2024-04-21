@@ -26,7 +26,7 @@ function getRandomInt(min, max, num) {
 
 // Start the game by choosing goal tiles.
 var points = 0;
-var chosenNum = 50;
+var chosenNum = 30;
 let tileIdxs = getRandomInt(0, cellNum, chosenNum);
 for (idx of tileIdxs) {
 	document.getElementById(idx).className = "tile-goal";
@@ -55,37 +55,44 @@ var n2 = setInterval(function() {
 var n3 = setInterval(function() {
 	for (idx of tileIdxs) {
 		let currentTile = document.getElementById(idx).className;
-		if (currentTile == "tile-avoid" && !getRandomInt(0, 10, 1)[0]) {
+		if (currentTile == "tile-avoid" && !getRandomInt(0, 5, 1)[0]) {
 			document.getElementById(idx).className = "tile-goal";
 		}
 	}
 }, 3000);
 
-// Get the mouse hover value.
+// Get the mouse pointer value.
 // On hover over grid, change tile colors.
 // While hovering, check for the following:
 // if goal tile, gain a point,
 // but if an avoid tile, the player loses.
-document.addEventListener('mousemove', e => {
-	//console.clear()
-	let target = document.elementFromPoint(e.clientX, e.clientY);
-	if (target.classList.contains("tile")) {
-		target.className = "tile-touched";
+function playerLost() {
+	for (let i = 0; i < cellNum; i++) {
+		let tile = document.getElementById(i);
+		//tile.removeEventListener(type, listener)
+		tile.className = "tile-lost";
 	}
-	if (target.classList.contains("tile-goal") || target.classList.contains("tile-changing")) {
-		target.className = "tile-touched";
-		points += 1;
-		document.getElementById("counter").innerHTML = points + " / " + chosenNum;
-	}
-	if (target.classList.contains("tile-avoid")) {
-		clearInterval(n1);
-		clearInterval(n2);
-		clearInterval(n3);
-		for (let i = 0; i < cellNum; i++) {
-			let currentTile = document.getElementById(i).className;
-			document.getElementById(i).className = "tile-lost";
+	document.getElementById("reload").style.visibility = "visible";
+	document.getElementById("counter").innerHTML = points + " / " + chosenNum;
+}
+for (let i = 0; i < cellNum; i++) {
+	let tile = document.getElementById(i);
+	tile.addEventListener('mouseenter', enter => {
+		let startingClass = enter.target.className;
+		if (startingClass == "tile") {
 		}
-		document.getElementById("button").style.visibility = "visible";
-		document.getElementById("counter").innerHTML = points + " / " + chosenNum;
-	}
-}, {passive: true})
+		if (startingClass == "tile-goal" || startingClass == "tile-changing") {
+			points += 1;
+			document.getElementById("counter").innerHTML = points + " / " + chosenNum;
+		}
+		if (startingClass == "tile-touched") {
+			playerLost();
+		}
+		else if (startingClass == "tile-avoid") {
+			playerLost();
+		}
+		else {
+			enter.target.className = "tile-touched";
+		}
+	}, {passive: true})
+}

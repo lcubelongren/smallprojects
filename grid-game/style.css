@@ -1,4 +1,10 @@
 
+html {}
+
+body, input {
+	font-family: "Lucida Console";
+}
+
 body {
 	display: grid;
 	grid-template-columns: 1fr;
@@ -22,12 +28,16 @@ body {
 #counter {
 	position: absolute;
 	transform: translateY(35vmin);
+	font-size: 3vmin;
 }
 
-#button {
+#reload {
 	position: absolute;
 	transform: translateY(-35vmin);
 	visibility: hidden;
+	background-color: transparent;
+	padding: 1vmin;
+	font-size: 2vmin;
 }
 
 .tile {
