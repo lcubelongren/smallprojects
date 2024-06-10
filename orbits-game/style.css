@@ -1,0 +1,96 @@
+:root {
+	--player-size: 25px;
+}
+
+html {
+	overflow: hidden;
+}
+
+body, input {
+	font-family: "Lucida Console";
+}
+
+body {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin: 0;
+	border-style: solid;
+	border-color: white;
+	border-width: 5vh 5vw 5vh 5vw;
+}
+
+#background {
+	height: 90vh;
+	width: 90vw;
+	background-color: black;
+}
+
+#planet {
+	position: absolute;
+	height: 300px;
+	width: 300px;
+	border-radius: 50%;
+	background-color: green;
+	transform: translate(0, 0);
+}
+
+#player {
+	position: absolute;
+}
+#player-nose {
+	position: relative;
+	border-top: var(--player-size) solid transparent;
+    border-left: var(--player-size) solid transparent;
+    border-right: var(--player-size) solid transparent;
+    border-bottom: calc(2 * var(--player-size) * 0.8) solid red;
+	transform: translateY(0);
+	z-index: 14;
+}
+#player-hull {
+	position: relative;
+	height: calc(2 * var(--player-size));
+	width: calc(2 * var(--player-size));
+	background-color: white;
+	transform: translateY(0);
+	z-index: 13;
+}
+#player-engine {
+	position: relative;
+	border-top: var(--player-size) solid transparent;
+    border-left: var(--player-size) solid transparent;
+    border-right: var(--player-size) solid transparent;
+    border-bottom: calc(2 * var(--player-size) * 1.0) solid grey;
+	transform: translateY(calc(var(--player-size) * -2.0));
+	z-index: 12;
+}
+#player-fire-down {
+	position: absolute;
+	height: calc(1 * var(--player-size));
+	width: calc(2 * var(--player-size));
+	clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 66% 50%, 50% 100%, 33% 50%, 0% 100%);
+	background-color: orange;
+	transform: translateY(calc(var(--player-size) * -2.0));
+	visibility: hidden;
+	z-index: 11;
+}
+#player-fire-left {
+	position: absolute;
+	height: calc(1 * var(--player-size));
+	width: calc(2 * var(--player-size));
+	clip-path: polygon(20% 0%, 20% 40%, 5% 40%, 10% 70%, 0% 80%, 50% 100%);
+	background-color: orange;
+	transform: translateY(calc(var(--player-size) * 1.0));
+	visibility: hidden;
+	z-index: 11;
+}
+#player-fire-right {
+	position: absolute;
+	height: calc(1 * var(--player-size));
+	width: calc(2 * var(--player-size));
+	clip-path: polygon(80% 0%, 80% 40%, 95% 40%, 90% 70%, 100% 80%, 50% 100%);
+	background-color: orange;
+	transform: translateY(calc(var(--player-size) * 1.0));
+	visibility: hidden;
+	z-index: 11;
+}
