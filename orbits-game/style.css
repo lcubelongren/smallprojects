@@ -1,3 +1,4 @@
+
 :root {
 	--player-size: 25px;
 }
@@ -28,8 +29,8 @@ body {
 
 #planet {
 	position: absolute;
-	height: 300px;
-	width: 300px;
+	height: 200px;
+	width: 200px;
 	border-radius: 50%;
 	background-color: green;
 	transform: translate(0, 0);
@@ -37,6 +38,7 @@ body {
 
 #player {
 	position: absolute;
+	transform: translate(0, 0) rotate(0deg);
 }
 #player-nose {
 	position: relative;
@@ -93,4 +95,11 @@ body {
 	transform: translateY(calc(var(--player-size) * 1.0));
 	visibility: hidden;
 	z-index: 11;
+}
+
+#player-position {
+	position: absolute;
+	bottom: 1.5vh;
+	font-size: 2vh;
+	color: black;
 }
