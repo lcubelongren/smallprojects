@@ -31,7 +31,8 @@ body {
 	position: absolute;
 	height: 1vmin;
 	width: 1vmin;
-	clip-path: polygon(40% 40%, 50% 0%, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0% 50%);
+	clip-path: polygon(40% 40%, 50% 0%, 60% 40%, 100% 50%, 
+	                   60% 60%, 50% 100%, 40% 60%, 0% 50%);
 	background-color: white;
 	z-index: 11;
 }
@@ -48,11 +49,38 @@ body {
 
 #station {
 	position: absolute;
-	height: var(--player-size);
-	width: calc(3 * var(--player-size));
-	background-color: grey;
+	height: calc(5 * var(--player-size));
+	width: calc(5 * var(--player-size));
+	clip-path: polygon( 60%  40%,  65%  35%,  95%  35%, 100%  40%, 
+	                   100%  60%,  95%  65%,  65%  65%,  60%  60%, 
+					    60% 100%,  40% 100%, 
+					    40%  60%,  35%  65%,   5%  65%,   0%  60%, 
+					     0%  40%,   5%  35%,  35%  35%,  40%  40%, 
+					    40%   0%,  60%   0%);
+	background-color: #dddde4;
+	box-shadow: calc(+0.3 * var(--player-size)) 0px #aa9472 inset, 
+	            calc(-0.3 * var(--player-size)) 0px #aa9472 inset;
 	transform: translate(0, 0);
 	z-index: 51;
+}
+#station-solarpanels {
+	position: relative;
+	width: calc(1.0 * var(--player-size));
+	height: calc(5.0 * var(--player-size));
+	background-color: #dddde4;
+	box-shadow: 0px calc(+1.95 * var(--player-size)) #4066c3 inset, 
+	            0px calc(-1.95 * var(--player-size)) #4066c3 inset;
+	transform: translate(calc(2 * var(--player-size)),
+	                     calc(0 * var(--player-size)));
+}
+#station-window {
+	position: absolute;
+	width: calc(0.7 * var(--player-size));
+	height: calc(0.7 * var(--player-size));
+	border-radius: 30%;
+	background-color: black;
+	transform: translate(calc(+0.7 * var(--player-size)),
+	                     calc(-3.0 * var(--player-size)));
 }
 
 #player {
@@ -90,7 +118,9 @@ body {
 	position: absolute;
 	height: calc(1 * var(--player-size));
 	width: calc(2 * var(--player-size));
-	clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 66% 50%, 50% 100%, 33% 50%, 0% 100%);
+	clip-path: polygon(20% 0%, 80%  0%, 100% 100%, 
+	                           66% 50%,  50% 100%, 
+							   33% 50%,   0% 100%);
 	background-color: orange;
 	transform: translateY(calc(var(--player-size) * -2.0));
 	visibility: hidden;
@@ -100,7 +130,8 @@ body {
 	position: absolute;
 	height: calc(1 * var(--player-size));
 	width: calc(2 * var(--player-size));
-	clip-path: polygon(20% 0%, 20% 40%, 5% 40%, 10% 70%, 0% 80%, 50% 100%);
+	clip-path: polygon(20% 0%, 20% 40%,  5%  40%, 
+	                   10% 70%, 0% 80%, 50% 100%);
 	background-color: orange;
 	transform: translateY(calc(var(--player-size) * 1.0));
 	visibility: hidden;
@@ -110,7 +141,8 @@ body {
 	position: absolute;
 	height: calc(1 * var(--player-size));
 	width: calc(2 * var(--player-size));
-	clip-path: polygon(80% 0%, 80% 40%, 95% 40%, 90% 70%, 100% 80%, 50% 100%);
+	clip-path: polygon(80%  0%,  80% 40%, 95%  40%, 
+	                   90% 70%, 100% 80%, 50% 100%);
 	background-color: orange;
 	transform: translateY(calc(var(--player-size) * 1.0));
 	visibility: hidden;

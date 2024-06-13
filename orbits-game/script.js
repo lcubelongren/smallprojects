@@ -1,12 +1,13 @@
 
-let frame_rate = 60;
-let time_step = 20;
-
-let G = 6.67408e-11; // m3 kg-1 s-2
+let G = 6.67408e-11;  // m3 kg-1 s-2
 let unit_modifier = 5e4;  // m px-1
+let view_modifier = 1;
 
-let player_acceleration = 2e-3 * unit_modifier / time_step;
-let player_rotation = 3e0;
+let frame_rate = 30;  // frames s-1
+let time_step = 20;  // s frame-1
+
+let player_acceleration = 1e-1 * unit_modifier / (time_step * frame_rate);
+let player_rotation = 2e2 / frame_rate;
 
 // Helper function to convert units while getting transform.
 // Everything is in [m] besides the .style.transform, which is [px].
@@ -90,18 +91,19 @@ document.addEventListener('keyup', (e) => {
   }
 })
 
-let view_modifier = 1;
-
 const executeMoves = () => {
 	
 	let orbit_period;
 	// Rotate planet on its axis.
-	//orbit_period = (14 * 60) + 4.75;  // minutes
 	orbit_period = 24 * 60;  // minutes
 	bodies['planet']['rotation'] -= (360 / (60 * orbit_period)) * time_step;
 	// Rotate station along orbit.
 	orbit_period = 92.9 - 0.7;  // minutes
 	bodies['station']['rotation'] -= (360 / (60 * orbit_period)) * time_step;
+	if ((Math.abs(bodies['planet']['position'][0] - bodies['station']['position'][0]) < 1e5) &&
+		((bodies['planet']['position'][1] - bodies['station']['position'][1]) < 0)) {
+		bodies['station']['rotation'] = 0;  // reset at the centerline
+	}
 	
 	// Move the player with engines and gravity.
 	bodies['player']['acceleration'] = [0, 0];
@@ -119,17 +121,23 @@ const executeMoves = () => {
 	}
 
 	// Show and hide the fire animations.
-	document.getElementById('player-fire-down').style.visibility = 'hidden';
-	document.getElementById('player-fire-left').style.visibility = 'hidden';
-	document.getElementById('player-fire-right').style.visibility = 'hidden';
 	if (controller['ArrowUp']['pressed']) {
 		document.getElementById('player-fire-down').style.visibility = 'visible';
+	}
+	else {
+		document.getElementById('player-fire-down').style.visibility = 'hidden';
 	}
 	if (controller['ArrowLeft']['pressed']) {
 		document.getElementById('player-fire-right').style.visibility = 'visible';
 	}
+	else {
+		document.getElementById('player-fire-right').style.visibility = 'hidden';
+	}
 	if (controller['ArrowRight']['pressed']) {
 		document.getElementById('player-fire-left').style.visibility = 'visible';
+	}
+	else {
+		document.getElementById('player-fire-left').style.visibility = 'hidden';
 	}
 
 	// Write the player position at the bottom of the window.
@@ -153,8 +161,8 @@ const executeMoves = () => {
 	}
 	unit_modifier = 5e4 * view_modifier;
 	document.documentElement.style.setProperty('--player-size', Number.parseFloat(bodies['player']['size'] / view_modifier) + 'px');
-	document.getElementById('planet').style.height = Number.parseFloat(bodies['planet']['size'] / unit_modifier) + 'px';
-	document.getElementById('planet').style.width = Number.parseFloat(bodies['planet']['size'] / unit_modifier) + 'px';
+	document.getElementById('planet').style.height = Number.parseFloat(bodies['planet']['size'] / (unit_modifier)) + 'px';
+	document.getElementById('planet').style.width = Number.parseFloat(bodies['planet']['size'] / (unit_modifier)) + 'px';
 	
 }
 setInterval(function(){ executeMoves() }, 1000*(1/frame_rate))
