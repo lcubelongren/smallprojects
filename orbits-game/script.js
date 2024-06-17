@@ -65,7 +65,7 @@ document.getElementById('planet').style.width = Number.parseFloat(bodies['planet
 let star_num = 100;
 let background = document.getElementById('background');
 for (let i = 0; i < star_num; i++) {
-	let [star_x, star_y, star_r] = [Math.random() * 100, Math.random() * 100, Math.random() * 0];
+	let [star_x, star_y, star_r] = [Math.random() * 88 + 1, Math.random() * 88 + 1, Math.random() * 0];  // for 5vmin/5vmax body border
 	let star_transform = `transform: translate(${star_x}vw, ${star_y}vh) rotate(${star_r}deg);`;
 	background.innerHTML += `<div class='star' style='${star_transform}'></div>`;
 }
@@ -178,13 +178,13 @@ const executeMoves = () => {
 	// Move the viewport in and out as the player moves.
 	let view_min = 2*6371e3;  // m
 	let view_max = 6*6371e3;  // m
+	let view_modifier_max = 1 + Math.log((view_max / view_min)**3);
+	let player2planet_distance = Math.abs(Math.sqrt(player_x**2 + player_y**2));
 	if (bodies['planet']['mass'] > 0) {
-		let player2planet_distance = Math.abs(Math.sqrt(player_x**2 + player_y**2));
 		if (player2planet_distance > view_max) {
 		}
 		else if (player2planet_distance > view_min) {
-			view_modifier = player2planet_distance / view_min;
-			view_modifier = 1 + Math.log(view_modifier**3)
+			view_modifier = 1 + Math.log((player2planet_distance / view_min)**3)
 		}
 		else {
 			view_modifier = 1;
@@ -195,29 +195,33 @@ const executeMoves = () => {
 	document.documentElement.style.setProperty('--station-size', Number.parseFloat(bodies['station']['size'] / view_modifier) + 'px');
 	document.getElementById('planet').style.height = Number.parseFloat(bodies['planet']['size'] / (unit_modifier)) + 'px';
 	document.getElementById('planet').style.width = Number.parseFloat(bodies['planet']['size'] / (unit_modifier)) + 'px';
+	document.getElementById('background').style.transform = `scale(${view_modifier_max/view_modifier})`;
 	
 	// Move between tiles.
 	tile_transition = false;
 	tile = player_tile.split(',');
-	if ((2 * (player_y / unit_modifier) + document.body.scrollHeight) < 0) {
+	let background_bounds = document.getElementById('background').getBoundingClientRect();
+	let height = background_bounds.height;
+	let width = background_bounds.width;
+	if ((2 * (player_y / unit_modifier) + height) < 0) {
 		tile_transition = true;
 		player_tile = tile[0] + ',' + (parseInt(tile[1]) + 1);
-		bodies['player']['position'][1] += document.body.scrollHeight * unit_modifier;
+		bodies['player']['position'][1] += height * unit_modifier;
 	}
-	if ((2 * (player_y / unit_modifier) - document.body.scrollHeight) > 0) {
+	if ((2 * (player_y / unit_modifier) - height) > 0) {
 		tile_transition = true;
 		player_tile = tile[0] + ',' + (parseInt(tile[1]) - 1);
-		bodies['player']['position'][1] -= document.body.scrollHeight * unit_modifier;
+		bodies['player']['position'][1] -= height * unit_modifier;
 	}
-	if ((2 * (player_x / unit_modifier) + document.body.scrollWidth) < 0) {
+	if ((2 * (player_x / unit_modifier) + width) < 0) {
 		tile_transition = true;
 		player_tile = (parseInt(tile[0]) - 1) + ',' + tile[1];
-		bodies['player']['position'][0] += document.body.scrollWidth * unit_modifier;
+		bodies['player']['position'][0] += width * unit_modifier;
 	}
-	if ((2 * (player_x / unit_modifier) - document.body.scrollWidth) > 0) {
+	if ((2 * (player_x / unit_modifier) - width) > 0) {
 		tile_transition = true;
 		player_tile = (parseInt(tile[0]) + 1) + ',' + tile[1];
-		bodies['player']['position'][0] -= document.body.scrollWidth * unit_modifier;
+		bodies['player']['position'][0] -= width * unit_modifier;
 	}
 	if (tile_transition) {
 		if (Object.keys(tile_info).includes(player_tile)) {
