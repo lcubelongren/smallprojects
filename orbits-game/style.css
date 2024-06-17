@@ -1,6 +1,8 @@
 
 :root {
 	--player-size: '';
+	--station-size: '';
+	--planet-color: '';
 }
 
 html {
@@ -37,20 +39,27 @@ body {
 	z-index: 11;
 }
 
+#loadingscreen {
+	position: absolute;
+	text-align: center;
+	color: white;
+	z-index: 12;
+}
+
 #planet {
 	position: absolute;
 	height: 200px;
 	width: 200px;
 	border-radius: 50%;
-	background-image: linear-gradient(green, blue);
+	background-image: var(--planet-color);
 	transform: translate(0, 0);
 	z-index: 50;
 }
 
 #station {
 	position: absolute;
-	height: calc(5 * var(--player-size));
-	width: calc(5 * var(--player-size));
+	height: calc(5 * var(--station-size));
+	width: calc(5 * var(--station-size));
 	clip-path: polygon( 60%  40%,  65%  35%,  95%  35%, 100%  40%, 
 	                   100%  60%,  95%  65%,  65%  65%,  60%  60%, 
 					    60% 100%,  40% 100%, 
@@ -58,29 +67,29 @@ body {
 					     0%  40%,   5%  35%,  35%  35%,  40%  40%, 
 					    40%   0%,  60%   0%);
 	background-color: #dddde4;
-	box-shadow: calc(+0.3 * var(--player-size)) 0px #aa9472 inset, 
-	            calc(-0.3 * var(--player-size)) 0px #aa9472 inset;
+	box-shadow: calc(+0.3 * var(--station-size)) 0px #aa9472 inset, 
+	            calc(-0.3 * var(--station-size)) 0px #aa9472 inset;
 	transform: translate(0, 0);
 	z-index: 51;
 }
 #station-solarpanels {
 	position: relative;
-	width: calc(1.0 * var(--player-size));
-	height: calc(5.0 * var(--player-size));
+	width: calc(1.0 * var(--station-size));
+	height: calc(5.0 * var(--station-size));
 	background-color: #dddde4;
-	box-shadow: 0px calc(+1.95 * var(--player-size)) #4066c3 inset, 
-	            0px calc(-1.95 * var(--player-size)) #4066c3 inset;
-	transform: translate(calc(2 * var(--player-size)),
-	                     calc(0 * var(--player-size)));
+	box-shadow: 0px calc(+1.95 * var(--station-size)) #4066c3 inset, 
+	            0px calc(-1.95 * var(--station-size)) #4066c3 inset;
+	transform: translate(calc(2 * var(--station-size)),
+	                     calc(0 * var(--station-size)));
 }
 #station-window {
 	position: absolute;
-	width: calc(0.7 * var(--player-size));
-	height: calc(0.7 * var(--player-size));
+	width: calc(0.7 * var(--station-size));
+	height: calc(0.7 * var(--station-size));
 	border-radius: 30%;
 	background-color: black;
-	transform: translate(calc(+0.7 * var(--player-size)),
-	                     calc(-3.0 * var(--player-size)));
+	transform: translate(calc(+0.7 * var(--station-size)),
+	                     calc(-3.0 * var(--station-size)));
 }
 
 #player {

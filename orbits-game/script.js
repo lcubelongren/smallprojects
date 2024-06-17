@@ -1,10 +1,15 @@
 
+// hide until page is loaded
+document.body.style.visibility = 'hidden';  
+document.getElementById('background').style.visibility = 'visible';
+document.getElementById('loadingscreen').style.visibility = 'visible';
+
 let G = 6.67408e-11;  // m3 kg-1 s-2
 let unit_modifier = 5e4;  // m px-1
 let view_modifier = 1;
 
-let frame_rate = 30;  // frames s-1
-let time_step = 20;  // s frame-1
+let frame_rate = 60;  // frames s-1
+let time_step = 10;  // s frame-1
 
 let player_acceleration = 1e-1 * unit_modifier / (time_step * frame_rate);
 let player_rotation = 2e2 / frame_rate;
@@ -25,11 +30,20 @@ for (name of body_names) {
 	bodies[name] = { position: [0, 0], velocity: [0, 0], acceleration: [0, 0], mass: 1, rotation: null, size: null };
 }
 
+let player_tile = '0,0';
+let tile_info = {
+	 '0,0': { planet_color: ['green',     'blue'], planet_mass: 6e24, planet_size: 2*6371e3, station_size: 30 },  // Earth
+	'-1,0': { planet_color: ['orange',    'grey'], planet_mass: 6e23, planet_size: 2*3390e3, station_size:  0 },  // Mars
+	 '1,0': { planet_color: ['brown',     'blue'], planet_mass: 2e27, planet_size: 2*6991e4, station_size:  0 },  // Jupiter
+	'0,-1': { planet_color: ['lightgrey', 'grey'], planet_mass: 3e23, planet_size: 2*2440e3, station_size:  0 },  // Mercury
+	 '0,1': { planet_color: ['white',     'grey'], planet_mass: 5e24, planet_size: 2*6052e3, station_size:  0 },  // Venus
+}
+
 bodies['player']['position'] = [0, -(23222e3+6371e3)];
 bodies['player']['velocity'] = [3.68e3, 0];
 bodies['player']['mass'] = 675;
 bodies['player']['rotation'] = 90;
-bodies['player']['size'] = 25;
+bodies['player']['size'] = 50;
 
 bodies['planet']['mass'] = 6e24;
 bodies['planet']['size'] = 2*6371e3;
@@ -38,9 +52,11 @@ bodies['station']['position'] = [0, ((422e3+413e3)/2+6371e3)];
 bodies['station']['velocity'] = [7.67e3, 0];
 bodies['station']['mass'] = 4.5e5;
 bodies['station']['rotation'] = 0;
-bodies['station']['size'] = 25;
+bodies['station']['size'] = 30;
 
 document.documentElement.style.setProperty('--player-size', Number.parseFloat(bodies['player']['size']) + 'px');
+document.documentElement.style.setProperty('--station-size', Number.parseFloat(bodies['station']['size']) + 'px');
+document.documentElement.style.setProperty('--planet-color', 'linear-gradient(green, blue)');
 
 document.getElementById('planet').style.height = Number.parseFloat(bodies['planet']['size'] / unit_modifier) + 'px';
 document.getElementById('planet').style.width = Number.parseFloat(bodies['planet']['size'] / unit_modifier) + 'px';
@@ -91,7 +107,20 @@ document.addEventListener('keyup', (e) => {
   }
 })
 
+let loading_screen = true;
+
 const executeMoves = () => {
+	
+	Object.keys(controller).forEach(key => {
+		if (controller[key].pressed) {
+			loading_screen = false;
+			document.body.style.visibility = 'visible';
+			document.getElementById('loadingscreen').style.visibility = 'hidden';
+		}
+	})
+	if (loading_screen) {
+		return null;
+	}
 	
 	let orbit_period;
 	// Rotate planet on its axis.
@@ -144,25 +173,75 @@ const executeMoves = () => {
 	let [player_x, player_y] = bodies['player']['position'];
 	player_x_km = Number.parseFloat(+player_x / 1e3).toPrecision(4);
 	player_y_km = Number.parseFloat(-player_y / 1e3).toPrecision(4);
-	document.getElementById('player-position').innerHTML = `\xa0\xa0\xa0(${player_x_km} x, ${player_y_km} y) km`;
+	document.getElementById('player-position').innerHTML = `tile (${player_tile}) - (${player_x_km} x, ${player_y_km} y) km`;
 	
 	// Move the viewport in and out as the player moves.
 	let view_min = 2*6371e3;  // m
 	let view_max = 6*6371e3;  // m
-	let player2planet_distance = Math.abs(Math.sqrt(player_x**2 + player_y**2));
-	if (player2planet_distance > view_max) {
-	}
-	else if (player2planet_distance > view_min) {
-		view_modifier = player2planet_distance / view_min;
-		view_modifier = 1 + Math.log(view_modifier**3)
-	}
-	else {
-		view_modifier = 1;
+	if (bodies['planet']['mass'] > 0) {
+		let player2planet_distance = Math.abs(Math.sqrt(player_x**2 + player_y**2));
+		if (player2planet_distance > view_max) {
+		}
+		else if (player2planet_distance > view_min) {
+			view_modifier = player2planet_distance / view_min;
+			view_modifier = 1 + Math.log(view_modifier**3)
+		}
+		else {
+			view_modifier = 1;
+		}
 	}
 	unit_modifier = 5e4 * view_modifier;
 	document.documentElement.style.setProperty('--player-size', Number.parseFloat(bodies['player']['size'] / view_modifier) + 'px');
+	document.documentElement.style.setProperty('--station-size', Number.parseFloat(bodies['station']['size'] / view_modifier) + 'px');
 	document.getElementById('planet').style.height = Number.parseFloat(bodies['planet']['size'] / (unit_modifier)) + 'px';
 	document.getElementById('planet').style.width = Number.parseFloat(bodies['planet']['size'] / (unit_modifier)) + 'px';
 	
+	// Move between tiles.
+	tile_transition = false;
+	tile = player_tile.split(',');
+	if ((2 * (player_y / unit_modifier) + document.body.scrollHeight) < 0) {
+		tile_transition = true;
+		player_tile = tile[0] + ',' + (parseInt(tile[1]) + 1);
+		bodies['player']['position'][1] += document.body.scrollHeight * unit_modifier;
+	}
+	if ((2 * (player_y / unit_modifier) - document.body.scrollHeight) > 0) {
+		tile_transition = true;
+		player_tile = tile[0] + ',' + (parseInt(tile[1]) - 1);
+		bodies['player']['position'][1] -= document.body.scrollHeight * unit_modifier;
+	}
+	if ((2 * (player_x / unit_modifier) + document.body.scrollWidth) < 0) {
+		tile_transition = true;
+		player_tile = (parseInt(tile[0]) - 1) + ',' + tile[1];
+		bodies['player']['position'][0] += document.body.scrollWidth * unit_modifier;
+	}
+	if ((2 * (player_x / unit_modifier) - document.body.scrollWidth) > 0) {
+		tile_transition = true;
+		player_tile = (parseInt(tile[0]) + 1) + ',' + tile[1];
+		bodies['player']['position'][0] -= document.body.scrollWidth * unit_modifier;
+	}
+	if (tile_transition) {
+		if (Object.keys(tile_info).includes(player_tile)) {
+			if (player_tile == '0,0') {
+				bodies['station']['position'] = [0, ((422e3+413e3)/2+6371e3)];
+				bodies['station']['velocity'] = [7.67e3, 0];
+				bodies['station']['mass'] = 4.5e5;
+				bodies['station']['rotation'] = 0;
+				bodies['station']['size'] = 30;
+			}
+			else {
+				bodies['station']['size'] = tile_info[player_tile]['station_size'];			
+			}
+			bodies['planet']['mass'] = tile_info[player_tile]['planet_mass'];
+			bodies['planet']['size'] = tile_info[player_tile]['planet_size'];
+			let [color1, color2] = tile_info[player_tile]['planet_color'];
+			document.documentElement.style.setProperty('--planet-color', `linear-gradient(${color1}, ${color2})`);
+		}
+		else {
+			bodies['planet']['mass'] = 0;
+			bodies['planet']['size'] = 0;
+		}
+		document.documentElement.style.setProperty('--station-size', Number.parseFloat(bodies['station']['size'] / view_modifier) + 'px');
+	}
+
 }
 setInterval(function(){ executeMoves() }, 1000*(1/frame_rate))
