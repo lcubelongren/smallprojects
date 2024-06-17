@@ -43,6 +43,7 @@ body {
 	position: absolute;
 	text-align: center;
 	color: white;
+	background-color: black;
 	z-index: 12;
 }
 
@@ -158,9 +159,16 @@ body {
 	z-index: 101;
 }
 
-#player-position {
+#player-info {
 	position: absolute;
 	bottom: 1.5vh;
+	font-size: 2vh;
+	color: black;
+	z-index: 20;
+}
+#tile-info {
+	position: absolute;
+	top: 1.5vh;
 	font-size: 2vh;
 	color: black;
 	z-index: 20;

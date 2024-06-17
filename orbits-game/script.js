@@ -30,14 +30,19 @@ for (name of body_names) {
 	bodies[name] = { position: [0, 0], velocity: [0, 0], acceleration: [0, 0], mass: 1, rotation: null, size: null };
 }
 
-let player_tile = '0,0';
 let tile_info = {
-	 '0,0': { planet_color: ['green',     'blue'], planet_mass: 6e24, planet_size: 2*6371e3, station_size: 30 },  // Earth
-	'-1,0': { planet_color: ['orange',    'grey'], planet_mass: 6e23, planet_size: 2*3390e3, station_size:  0 },  // Mars
-	 '1,0': { planet_color: ['brown',     'blue'], planet_mass: 2e27, planet_size: 2*6991e4, station_size:  0 },  // Jupiter
-	'0,-1': { planet_color: ['lightgrey', 'grey'], planet_mass: 3e23, planet_size: 2*2440e3, station_size:  0 },  // Mercury
-	 '0,1': { planet_color: ['white',     'grey'], planet_mass: 5e24, planet_size: 2*6052e3, station_size:  0 },  // Venus
+	 '0,0': { tile_name: 'Earth',   planet_color: ['green',     'blue'], planet_mass: 6e24, planet_size: 2*6371e3, station_size: 30 },
+    '-1,0': { tile_name: 'Mercury', planet_color: ['lightgrey', 'grey'], planet_mass: 3e23, planet_size: 2*2440e3, station_size:  0 },
+	'0,-1': { tile_name: 'Venus',   planet_color: ['white',     'grey'], planet_mass: 5e24, planet_size: 2*6052e3, station_size:  0 },
+	 '1,0': { tile_name: 'Mars',    planet_color: ['orange',    'grey'], planet_mass: 6e23, planet_size: 2*3390e3, station_size:  0 },
+	 '0,1': { tile_name: 'Pluto',   planet_color: ['brown',    'beige'],     planet_mass: 1e22, planet_size: 2*1188e3, station_size:  0 },
+   '-1,-1': { tile_name: 'Jupiter', planet_color: ['brown',     'blue'],      planet_mass: 2e27, planet_size: 2*6991e4, station_size:  0 },
+	'1,-1': { tile_name: 'Saturn',  planet_color: ['khaki',           'tan'], planet_mass: 6e26, planet_size: 2*5823e4, station_size:  0 },
+	'-1,1': { tile_name: 'Uranus',  planet_color: ['lightblue', 'lightblue'], planet_mass: 9e25, planet_size: 2*2536e4, station_size:  0 },
+	 '1,1': { tile_name: 'Neptune', planet_color: ['lightblue', 'lightblue'], planet_mass: 1e26, planet_size: 2*2462e4, station_size:  0 },
 }
+let player_tile = '0,0';
+let tile_name = tile_info[player_tile]['tile_name'];
 
 bodies['player']['position'] = [0, -(23222e3+6371e3)];
 bodies['player']['velocity'] = [3.68e3, 0];
@@ -168,20 +173,24 @@ const executeMoves = () => {
 	else {
 		document.getElementById('player-fire-left').style.visibility = 'hidden';
 	}
+	
+	// Write the tile info at the top of the window.
+	document.getElementById('tile-info').innerHTML = `tile (${player_tile}) - ${tile_name}`;
 
-	// Write the player position at the bottom of the window.
+	// Write the player info at the bottom of the window.
 	let [player_x, player_y] = bodies['player']['position'];
 	player_x_km = Number.parseFloat(+player_x / 1e3).toPrecision(4);
 	player_y_km = Number.parseFloat(-player_y / 1e3).toPrecision(4);
-	document.getElementById('player-position').innerHTML = `tile (${player_tile}) - (${player_x_km} x, ${player_y_km} y) km`;
+	document.getElementById('player-info').innerHTML = `(${player_x_km} x, ${player_y_km} y) km`;
 	
 	// Move the viewport in and out as the player moves.
-	let view_min = 2*6371e3;  // m
-	let view_max = 6*6371e3;  // m
+	let view_min = tile_info['0,0']['planet_size']
+	let view_max = tile_info['0,0']['planet_size']*3
 	let view_modifier_max = 1 + Math.log((view_max / view_min)**3);
 	let player2planet_distance = Math.abs(Math.sqrt(player_x**2 + player_y**2));
 	if (bodies['planet']['mass'] > 0) {
 		if (player2planet_distance > view_max) {
+			view_modifier = view_modifier_max;
 		}
 		else if (player2planet_distance > view_min) {
 			view_modifier = 1 + Math.log((player2planet_distance / view_min)**3)
@@ -203,25 +212,30 @@ const executeMoves = () => {
 	let background_bounds = document.getElementById('background').getBoundingClientRect();
 	let height = background_bounds.height;
 	let width = background_bounds.width;
-	if ((2 * (player_y / unit_modifier) + height) < 0) {
+	document.body.style.borderColor = 'white';
+	if ((2 * (player_y / unit_modifier) + height) < 0) {  // top
 		tile_transition = true;
 		player_tile = tile[0] + ',' + (parseInt(tile[1]) + 1);
 		bodies['player']['position'][1] += height * unit_modifier;
+		document.body.style.borderTopColor = 'black';
 	}
-	if ((2 * (player_y / unit_modifier) - height) > 0) {
+	if ((2 * (player_y / unit_modifier) - height) > 0) {  // bottom
 		tile_transition = true;
 		player_tile = tile[0] + ',' + (parseInt(tile[1]) - 1);
 		bodies['player']['position'][1] -= height * unit_modifier;
+		document.body.style.borderBottomColor = 'black';
 	}
-	if ((2 * (player_x / unit_modifier) + width) < 0) {
+	if ((2 * (player_x / unit_modifier) + width) < 0) {  // left
 		tile_transition = true;
 		player_tile = (parseInt(tile[0]) - 1) + ',' + tile[1];
 		bodies['player']['position'][0] += width * unit_modifier;
+		document.body.style.borderLeftColor = 'black';
 	}
-	if ((2 * (player_x / unit_modifier) - width) > 0) {
+	if ((2 * (player_x / unit_modifier) - width) > 0) {  // right
 		tile_transition = true;
 		player_tile = (parseInt(tile[0]) + 1) + ',' + tile[1];
 		bodies['player']['position'][0] -= width * unit_modifier;
+		document.body.style.borderRightColor = 'black';
 	}
 	if (tile_transition) {
 		if (Object.keys(tile_info).includes(player_tile)) {
@@ -239,10 +253,12 @@ const executeMoves = () => {
 			bodies['planet']['size'] = tile_info[player_tile]['planet_size'];
 			let [color1, color2] = tile_info[player_tile]['planet_color'];
 			document.documentElement.style.setProperty('--planet-color', `linear-gradient(${color1}, ${color2})`);
+			tile_name = tile_info[player_tile]['tile_name'];
 		}
 		else {
 			bodies['planet']['mass'] = 0;
 			bodies['planet']['size'] = 0;
+			tile_name = 'Empty space';
 		}
 		document.documentElement.style.setProperty('--station-size', Number.parseFloat(bodies['station']['size'] / view_modifier) + 'px');
 	}
