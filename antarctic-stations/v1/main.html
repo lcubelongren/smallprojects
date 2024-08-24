@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Antarctic Station Map</title>
+<style>
+html, body {
+margin: 0;
+}
+#content {
+width: 100vw;
+height: 100vh;
+display: flex;
+align-items: center;
+justify-content: center;
+overflow: hidden;
+}
+#canvas {
+width: 120vmin;
+height: 90vmin;
+background-color: black;
+}
+</style>
+</head>
+<body>
+<div id="content">
+<canvas id="canvas"></canvas>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="https://unpkg.com/topojson@3"></script>
+<script src="script.js"></script>
+</body>
+</html>
