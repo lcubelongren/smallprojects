@@ -125,6 +125,8 @@ d3.json(iceshelves_path)
 	iceshelves = data;
 })
 
+let exclude_types = [];
+
 async function main() {
 	
 	let country_data = [];
@@ -153,7 +155,42 @@ async function main() {
 	let geoGenerator = d3.geoPath(projection, context);
 	let geoStation = d3.geoCircle();
 	
-	function drawMap() {
+	function drawMap(exclude_types=[]) {
+
+		context.clearRect(0, 0, canvas.width, canvas.height);
+
+		for (data of country_data) {
+			if (countries[data['country']]['display']) {
+				context.lineWidth = 1.5;
+				for (item of data['items']) {
+					if (exclude_types.includes(item['TYPE']) == false) {
+						context.fillStyle = countries[data['country']]['color'];
+						context.strokeStyle = 'white';
+						if (item['TYPE'] == 'Station') {
+							geoStation.radius(0.5);
+							context.globalCompositeOperation = 'source-over';
+						}
+						else {
+							geoStation.radius(0.3);
+							context.globalCompositeOperation = 'destination-over';
+						}
+						geoStation.center([item['LON'], item['LAT']]);
+						context.beginPath();
+						geoGenerator(geoStation());
+						context.fill();
+						context.stroke();
+					}
+				}
+			}
+		}
+		
+		context.globalCompositeOperation = 'destination-over';
+		
+		context.beginPath();
+		geoGenerator(graticule());
+		context.strokeStyle = '#a9a9a9';
+		context.lineWidth = 2;
+		context.stroke();
 
 		context.beginPath();
 		geoGenerator({type: 'FeatureCollection', features: land.features})
@@ -164,33 +201,6 @@ async function main() {
 		geoGenerator({type: 'FeatureCollection', features: iceshelves.features})
 		context.fillStyle = '#e8f4f8';
 		context.fill();
-		
-		context.beginPath();
-		geoGenerator(graticule());
-		context.strokeStyle = 'gray';
-		context.lineWidth = 2;
-		context.stroke();
-
-		for (data of country_data) {
-			if (countries[data['country']]['display']) {
-				context.lineWidth = 1.5;
-				for (item of data['items']) {
-					context.fillStyle = countries[data['country']]['color'];
-					context.strokeStyle = 'white';
-					if (item['TYPE'] == 'Station') {
-						geoStation.radius(0.5);
-					}
-					else {
-						geoStation.radius(0.3);
-					}
-					geoStation.center([item['LON'], item['LAT']]);
-					context.beginPath();
-					geoGenerator(geoStation());
-					context.fill();
-					context.stroke();
-				}
-			}
-		}
 	
 	}
 	
@@ -204,13 +214,15 @@ async function main() {
 		let tooltipOn = false;
 		for (data of country_data) {
 			for (item of data['items']) {
-				if (d3.geoDistance(mouse, [item['LON'], item['LAT']]) < 0.01) {
-					if (countries[data['country']]['display'] == true) {
-						tooltip.style.display = 'block';
-						tooltip.style.left = (event.pageX + 10) + 'px';
-						tooltip.style.top = (event.pageY + 10) + 'px';
-						tooltip.innerHTML = item['NAME'] + '<br><i>' + item['TYPE'] + '</i><br><b>' + data['country'] + '</b>';
-						tooltipOn = true;
+				if (exclude_types.includes(item['TYPE']) == false) {
+					if (d3.geoDistance(mouse, [item['LON'], item['LAT']]) < 0.01) {
+						if (countries[data['country']]['display'] == true) {
+							tooltip.style.display = 'block';
+							tooltip.style.left = (event.pageX + 10) + 'px';
+							tooltip.style.top = (event.pageY + 10) + 'px';
+							tooltip.innerHTML = item['NAME'] + '<br><i>' + item['TYPE'] + '</i><br><b>' + data['country'] + '</b>';
+							tooltipOn = true;
+						}
 					}
 				}
 			}
@@ -224,18 +236,6 @@ async function main() {
 	let flag_width = 'calc((120vmin / ' + (Object.keys(countries).length / 2).toString() + ') - 0.5vmin)';
 	var flags = document.getElementById('flags');
 	flags.style.width = 'calc(2 * ' + flag_width + ' + 1.0vmin)';
-	function positionFlags() {
-		if (canvas.getBoundingClientRect().left > 0) {
-			flags.style.right = canvas.getBoundingClientRect().left + 'px';
-		}
-		else {
-			flags.style.right = 0;
-		}
-	}
-	positionFlags();
-	window.addEventListener('resize', function (event) {
-		positionFlags();
-	})
 	for (country_name of Object.keys(countries)) {
 		flags.innerHTML += '<img class="flag" id="flag-' + country_name + 
 		                   '" src="./flags/' + countries[country_name]['code'] + '.svg"' +
@@ -244,13 +244,6 @@ async function main() {
 		flag.style.height = flag_height;
 		flag.style.width = flag_width;
 		flag.style.margin = '0.25vmin';
-		flag.style.objectFit = 'cover';
-	}
-	for (flag of document.getElementsByClassName('flag')) {
-		flag.addEventListener('click', function (event) {
-			let country_name = event.target.id.split('-').slice(1)[0];
-			toggleCountry(country_name);
-		})
 	}
 	function toggleCountry(country_name) {
 		let flag = document.getElementById('flag-' + country_name);
@@ -262,11 +255,91 @@ async function main() {
 			countries[country_name]['display'] = true;
 			flag.style.opacity = 1.0;
 		}
-		context.clearRect(0, 0, canvas.width, canvas.height);
-		drawMap();
 	}
+	for (flag of document.getElementsByClassName('flag')) {
+		flag.addEventListener('click', function (event) {
+			let country_name = event.target.id.split('-').slice(1)[0];
+			toggleCountry(country_name);
+			drawMap();
+		})
+	}
+	
+	var toolbar = document.getElementById('toolbar');
+	function toggleCountries() {
+		for (country_name of Object.keys(countries)) {
+			countries[country_name]['display'] = false;
+			document.getElementById('flag-' + country_name).style.opacity = 0.6;
+		}
+	}
+	toolbar.innerHTML += '<span>toggle all:</span>'
+	toolbar.innerHTML += '<span class="toggle">' +
+	                     '<input id="toggle-stations" type="checkbox" checked>' +
+						 '<label for="toggle-stations">stations</label>' +
+						 '</span>';
+	toolbar.innerHTML += '<span class="toggle">' +
+	                     '<input id="toggle-camps" type="checkbox" checked>' +
+						 '<label for="toggle-camps">camps</label>' +
+						 '</span>';
+	toolbar.innerHTML += '<span class="toggle">' +
+	                     '<input id="toggle-countries" type="checkbox" checked>' +
+						 '<label for="toggle-countries">countries</label>' +
+						 '</span>';
+	document.getElementById('toggle-stations').addEventListener('change', function(event) {
+		if (event.target.checked) {
+			exclude_types = exclude_types.filter(e => e !== 'Station');
+		}
+		else {
+			exclude_types.push('Station');
+		}
+		drawMap(exclude_types)
+	})
+	document.getElementById('toggle-camps').addEventListener('change', function(event) {
+		for (camp_type of ['Camp', 'Refuge', 'Depot', 'Laboratory', 'Airfield Camp']) {
+			if (event.target.checked) {
+				exclude_types = exclude_types.filter(e => e !== camp_type);
+			}
+			else {
+				exclude_types.push(camp_type);
+			}
+		}
+		drawMap(exclude_types)
+	})
+	document.getElementById('toggle-countries').addEventListener('change', function(event) {
+		for (country_name of Object.keys(countries)) {
+			if (event.target.checked) {
+				if (countries[country_name]['display'] == false) {
+					toggleCountry(country_name);
+				}
+			}
+			else {
+				if (countries[country_name]['display'] == true) {
+					toggleCountry(country_name);
+				}
+			}
+		}
+		drawMap(exclude_types);
+	})
+	
+	function positionFlags() {
+		if (canvas.getBoundingClientRect().left > 0) {
+			flags.style.right = canvas.getBoundingClientRect().left + 'px';
+		}
+		else {
+			flags.style.right = 0;
+		}
+	}
+	function positionToolbar() {
+		toolbar.style.bottom = canvas.getBoundingClientRect().top + 'px';
+		toolbar.style.visibility = 'visible';
+	}
+	positionFlags();
+	positionToolbar();
+	window.addEventListener('resize', function (event) {
+		positionFlags();
+		positionToolbar();
+	})
 
-	document.getElementById('loading').remove()
+	document.getElementById('loading').remove();
 }
 
 main();

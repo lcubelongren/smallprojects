@@ -1,0 +1,73 @@
+
+html, body {
+margin: 0;
+overflow: hidden;
+user-select: none;
+font-size: 2vmin;
+}
+#content {
+width: 100vw;
+height: 100vh;
+display: flex;
+align-items: center;
+justify-content: center;
+overflow: hidden;
+}
+#canvas {
+width: 120vmin;
+height: 90vmin;
+background-color: black;
+z-index: 1;
+}
+#tooltip {
+display: none;
+position: absolute;
+padding: 0.75vmin;
+border: 0.25vmin solid black;
+background: white;
+z-index: 4;
+}
+#toolbar {
+position: absolute;
+height: 7.5vmin;
+display: flex;
+align-items: center;
+color: black;
+font-size: 2.5vmin;
+-webkit-text-stroke: 0.02vmin;
+-webkit-text-fill-color: white;
+visibility: hidden;
+z-index: 3;
+}
+.toggle {
+display: flex;
+align-items: center;
+margin: 0.5vmin;
+padding: 0.75vmin;
+border: 0.25vmin solid white;
+background: black;
+}
+input[type=checkbox] {
+width: 2vmin;
+height: 2vmin;
+margin: 0.5vmin;
+accent-color: white;
+}
+#flags {
+position: absolute;
+height: 90vmin;
+line-height: 0;
+background: black;
+z-index: 2;
+}
+.flag {
+object-fit: cover;
+cursor: pointer;
+}
+#loading {
+position: absolute;
+color: white;
+font-size: 5vmin;
+text-shadow: 0.2vmin 0.2vmin 0.5vmin #e8f4f8;
+z-index: 5;
+}
