@@ -1,0 +1,39 @@
+﻿@media print {
+    html, body {
+        height: 100% !important;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    body {
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    .accordion__item__body {
+        border: none !important;
+    }
+     
+
+    span.accordion__item__button__icon-wrapper {
+        display: none !important;
+    }
+
+    li.js-accordion-item.accordion__item:not(.-active) {
+        display: none !important;
+    }
+
+    .report--filter {
+        display: none !important;
+        height: 1px !important;
+    }
+
+    .report--item {
+        page-break-inside: avoid !important;
+    }
+
+    .js-accordion-body-wrapper {
+        height:100% !important;
+    }
+}​​

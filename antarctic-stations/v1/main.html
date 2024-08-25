@@ -3,9 +3,11 @@
 <head>
 <meta charset="utf-8">
 <title>Antarctic Station Map</title>
+<link rel="icon" type="image/x-icon" href="./Antarctica_6400px_from_Blue_Marble.jpg">
 <style>
 html, body {
 margin: 0;
+overflow: hidden;
 }
 #content {
 width: 100vw;
@@ -19,12 +21,38 @@ overflow: hidden;
 width: 120vmin;
 height: 90vmin;
 background-color: black;
+z-index: 1;
+}
+#tooltip {
+display: none;
+position: absolute;
+user-select: none;
+padding: 5px;
+border: 2px solid black;
+background: white;
+z-index: 3;
+}
+#flags {
+position: absolute;
+height: 90vmin;
+line-height: 0;
+background: black;
+z-index: 2;
+}
+#loading {
+position: absolute;
+color: white;
+font-size: 5vmin;
+text-shadow: 0.2vmin 0.2vmin 0.5vmin #e8f4f8;
 }
 </style>
 </head>
 <body>
 <div id="content">
 <canvas id="canvas"></canvas>
+<span id="tooltip"></span>
+<div id="flags"></div>
+<div id="loading">Loading...</div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script src="https://unpkg.com/topojson@3"></script>
