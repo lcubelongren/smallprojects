@@ -1,0 +1,124 @@
+
+html, body {
+	margin: 0;
+	overflow: hidden;
+	user-select: none;
+	font-size: 2vmin;
+}
+
+#content {
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+}
+#canvas {
+	width: 120vmin;
+	height: 90vmin;
+	background-color: black;
+	z-index: 1;
+}
+
+#tooltip {
+	display: none;
+	width: auto;
+	max-width: 60vmin;
+	position: absolute;
+	padding: 0.75vmin;
+	border: 0.25vmin solid black;
+	background: white;
+	pointer-events: none;
+	z-index: 4;
+}
+
+#toolbar {
+	position: absolute;
+	height: 10vmin;
+	display: flex;
+	align-items: center;
+	color: black;
+	font-size: 2vmin;
+	-webkit-text-stroke: 0.02vmin;
+	-webkit-text-fill-color: white;
+	visibility: hidden;
+	z-index: 3;
+}
+.toggle {
+	height: 7vmin;
+	display: flex;
+	align-items: center;
+	margin: 0.5vmin;
+	padding: 1vmin;
+	border: 0.25vmin solid white;
+	box-sizing: border-box;
+	background: black;
+}
+input[type=checkbox] {
+	width: 2vmin;
+	height: 2vmin;
+	margin: 0.5vmin;
+	accent-color: white;
+	cursor: pointer;
+}
+label {
+	cursor: pointer;
+}
+
+#flags {
+	position: absolute;
+	height: 90vmin;
+	line-height: 0;
+	background: black;
+	z-index: 2;
+}
+.flag {
+	object-fit: cover;
+	cursor: pointer;
+}
+
+#info {
+	position: absolute;
+	width: 4vmin;
+	height: 4vmin;
+	margin: 2vmin;
+	color: white;
+	background: black;
+	border: 0.25vmin solid white;
+	border-radius: 0vmin;
+	box-sizing: border-box;
+	overflow: hidden;
+	cursor: pointer;
+	visibility: hidden;
+	z-index: 5;
+}
+#info.active {
+	width: 45vmin;
+	height: 60vmin;
+}
+#info-icon {
+	position: fixed;
+	line-height: 3vmin;
+	font-size: 3vmin;
+	padding: 0.25vmin 0 0 1.25vmin;
+}
+#info-text {
+	line-height: 2.75vmin;
+	font-size: 2.5vmin;
+	padding: 1.25vmin;
+}
+a {
+	color: white;
+}
+a:hover {
+	color: #e8f4f8;
+}
+
+#loading {
+	position: absolute;
+	color: white;
+	font-size: 5vmin;
+	text-shadow: 0.2vmin 0.2vmin 0.5vmin #e8f4f8;
+	z-index: 6;
+}

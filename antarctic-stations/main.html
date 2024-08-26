@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Antarctic Station Map</title>
+<link rel="icon" type="image/x-icon" href="./Antarctica_6400px_from_Blue_Marble.jpg">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="content">
+<canvas id="canvas"></canvas>
+<span id="tooltip"></span>
+<div id="toolbar"></div>
+<div id="flags"></div>
+<div id="info">
+<div id="info-icon">&#x2139;</div>
+<div id="info-text">
+<br>
+A map of all Antarctic places documented by the 
+<a href="https://www.ats.aq/e/secretariat.html" target="_blank">Secretariat of the Antarctic Treaty</a>.
+Each participating country's Permanent Information document is referenced and every listed location mapped.
+This information is reported as a requirement of Article VII of the Treaty.<br>
+<br>
+Click the flags and toggles or mouse over each dot to explore the continent.<br>
+<br>
+Not all Antarctic locations are included, however many are. 
+Some positional errors are present in the reporting and remain uncorrected on the map.
+See if you can find the errors. &#10052;<br>
+<br>
+Created by L.L. Longren<br>
+<br>
+rev. 08/2024
+</div>
+</div>
+<div id="loading">Loading...</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="https://unpkg.com/topojson@3"></script>
+<script src="script.js"></script>
+</body>
+</html>
