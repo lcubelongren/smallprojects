@@ -38,9 +38,9 @@ async function main() {
 	.node()
 	.getContext('2d');
 
-	let projection = d3.geoOrthographic()
+	let projection = d3.geoAzimuthalEquidistant()
 	.rotate([0, 90])
-	.scale(canvas.height * 0.99)
+	.scale(canvas.height * 0.95)
 	.translate([canvas.width / 2, canvas.height / 2]);
 
 	let graticule = d3.geoGraticule();
