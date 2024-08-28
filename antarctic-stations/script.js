@@ -1,35 +1,43 @@
 
-let land_path = './maps/land-50m.json';  // topojson
-let land;
-d3.json(land_path)
-.then(function(data) {
-	land = topojson.feature(data, data.objects.land);
-})
-
-let iceshelves_path = './maps/ne_50m_antarctic_ice_shelves_polys.json';  // geojson
-let iceshelves;
-d3.json(iceshelves_path)
-.then(function(data) {
-	iceshelves = data;
-})
-
-let exclude_types = [];
-
 async function main() {
 	
-	let scrape_path = './scrape_data.json';
-	const response = await fetch(scrape_path);
-	const data = await response.json();
+	async function loadData() {
 
-	let country_data = {};
-	for (d of data) {
-		let country = Object.keys(d);
-		country_data[country] = d[country];
+		let scrape_path = './scrape_data.json';
+		const response = await fetch(scrape_path);
+		const data = await response.json();
+
+		let country_data = {};
+		for (d of data) {
+			let country = Object.keys(d);
+			country_data[country] = d[country];
+		}
+		
+		for (country of Object.keys(country_data)) {
+			country_data[country]['display'] = true;
+		}
+		
+		let land_path = './maps/land-50m.json';  // topojson
+		let land_data;
+		await d3.json(land_path)
+		.then(function(data) {
+			land_data = topojson.feature(data, data.objects.land);
+		})
+
+		let iceshelf_path = './maps/ne_50m_antarctic_ice_shelves_polys.json';  // geojson
+		let iceshelf_data;
+		await d3.json(iceshelf_path)
+		.then(function(data) {
+			iceshelf_data = data;
+		})
+
+		return [country_data, land_data, iceshelf_data];
+
 	}
 	
-	for (country of Object.keys(country_data)) {
-		country_data[country]['display'] = true;
-	}
+	let [country_data, land_data, iceshelf_data] = await loadData();
+	
+	let exclude_types = [];
 
 	canvas.width = 1600;
 	canvas.height = 1200;
@@ -91,12 +99,12 @@ async function main() {
 		context.stroke();
 
 		context.beginPath();
-		geoGenerator({type: 'FeatureCollection', features: land.features})
+		geoGenerator({type: 'FeatureCollection', features: land_data.features})
 		context.fillStyle = 'white';
 		context.fill();
 		
 		context.beginPath();
-		geoGenerator({type: 'FeatureCollection', features: iceshelves.features})
+		geoGenerator({type: 'FeatureCollection', features: iceshelf_data.features})
 		context.fillStyle = '#e8f4f8';
 		context.fill();
 	
