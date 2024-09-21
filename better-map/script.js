@@ -89,6 +89,66 @@ async function main() {
 			clearTimeout(cursor_timeout);
 		}
 		scale *= 1 + (-0.0005 * event.deltaY);
+		scale = limit_scale(scale);
+		projection.scale(scale);
+		drawMap();
+	});
+	canvas.addEventListener('mousedown', function (event) {
+		canvas.style.cursor = 'grabbing';
+	});
+	
+	//https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events/Pinch_zoom_gestures
+	const evCache = [];
+	let prevDiff = -1;
+	canvas.addEventListener('pointerdown', function (event) {
+		evCache.push(event);
+	});
+	canvas.addEventListener('pointermove', function (event) {
+		const index = evCache.findIndex(
+			(cachedEv) => cachedEv.pointerId === event.pointerId,
+		);
+		evCache[index] = event;
+		console.log(index, evCache.length, evCache)
+		if (evCache.length === 2) {
+			const XDiff = Math.abs(evCache[0].clientX - evCache[1].clientX);
+			const YDiff = Math.abs(evCache[0].clientY - evCache[1].clientY);
+			const curDiff = Math.abs(XDiff - YDiff);
+			if (prevDiff > 0) {
+				if (curDiff > prevDiff) {
+					scale *= 1 + 0.005;
+				}
+				if (curDiff < prevDiff) {
+					scale *= 1 - 0.005;
+				}
+				scale = limit_scale(scale);
+				projection.scale(scale);
+			}
+			prevDiff = curDiff;
+		}
+	});
+	canvas.addEventListener('pointerup', function (event) {
+		removeEvent(event);
+	});
+	canvas.addEventListener('pointercancel', function (event) {
+		removeEvent(event);
+	});
+	canvas.addEventListener('pointerout', function (event) {
+		removeEvent(event);
+	});
+	canvas.addEventListener('pointerleave', function (event) {
+		removeEvent(event);
+	});
+	function removeEvent(event) {
+		const index = evCache.findIndex(
+			(cachedEv) => cachedEv.pointerId === event.pointerId,
+		);
+		evCache.splice(index, 1);
+		if (evCache.length < 2) {
+			prevDiff = -1;
+		}
+	};
+	
+	function limit_scale(scale) {
 		if (scale < canvas.height * 0.35) {
 			scale = canvas.height * 0.35;
 			canvas.style.cursor = 'grab';
@@ -97,16 +157,12 @@ async function main() {
 			scale = canvas.height * 2.0;
 			canvas.style.cursor = 'grab';
 		}
-		projection.scale(scale);
-		drawMap();
-	});
-	canvas.addEventListener('mousedown', function (event) {
-		canvas.style.cursor = 'grabbing';
-	});
+		return scale;
+	};
 	
 	d3.select(context.canvas)
 	.call(drag(projection)
-		.on('drag.render', () => { drawMap() })
+	    .on('drag.render', () => { drawMap() })
 		.on('end.render', () => { drawMap(); canvas.style.cursor = 'grab';})
 	);
 	
