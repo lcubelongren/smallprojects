@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- saved from url=(0069)https://eies.ats.aq/Report/GenRpt?idParty=23&period=3&idYear=0&lang=e -->
-<html lang="en" class="k-webkit k-webkit127"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html lang="en" class="k-webkit k-webkit129"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -167,7 +167,7 @@
             <nav class="js-nav header__nav nav nav--secondary">
                 <ul class="nav__list">
                     <li class="nav__item">
-                        <button class="form__submit report_print_button" onclick="report.print(); return false;"><span>Print Report</span></button>
+                        <button class="form__submit report_print_button" onclick="window.print(); return false;"><span>Print Report</span></button>
                     </li>
                 </ul>
             </nav>
@@ -1048,7 +1048,7 @@
                                         <div class="report--item--header--title__value fs14 fw-500">
                                             <span><strong>Site Name</strong>: </span>MD78 (MD78)&nbsp;&nbsp;-
                                             <span><strong>Lat</strong>: </span>71º 26´ 55´´ S&nbsp;&nbsp;-
-                                            <span><strong>Long</strong>: </span>44º 00´ 32´´ W&nbsp;&nbsp;
+                                            <span><strong>Long</strong>: </span>44º 00´ 32´´ E&nbsp;&nbsp;
                                         </div>
                                     </div>
                                     <div class="col-xs-5 col-md-5 col-lg-5">
@@ -4386,6 +4386,10 @@ The Government of Japan issues and distributes pamphlets, and set up website to 
     </script>
 
     <script type="text/javascript">
+        window.print = function () {
+            report.print();
+        };
+
         var report = (function () {
             var loaded = [];
             var collapsed = true;
