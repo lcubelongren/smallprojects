@@ -5,3 +5,8 @@
 
 # Google Takeout
 */Takeout
+
+# data files
+*.csv
+*.dat
+*.json
