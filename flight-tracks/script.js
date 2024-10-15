@@ -55,7 +55,7 @@ async function plotTrack(idx) {
 	let track = tracks[4];
 	let line = {type: 'LineString', coordinates: track};
 	let [clon, clat] = d3.geoCentroid(line);
-	let buffer = 0.55
+	let buffer = 0.5
 	const projection = d3.geoOrthographic();
 	const canvas = document.getElementById('canvas');
 	const context = canvas.getContext('2d');
