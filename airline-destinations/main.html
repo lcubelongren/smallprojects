@@ -2,16 +2,21 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>A Better Map</title>
+<title>Airline Destinations</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div id="content">
 <canvas id="canvas"></canvas>
+<div class="slidecontainer">
+<span id="fromYear" class="year" style="left: -7vmin"></span>
+<input type="range" step="1" class="slider" id="yearRangeHigh">
+<input type="range" step="1" class="slider" id="yearRangeLow">
+<span id="toYear" class="year" style="right: -7vmin"></span>
+</div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script src="https://unpkg.com/topojson@3"></script>
-<script src="https://cdn.jsdelivr.net/npm/versor@0.2.0"></script>
 <script src="script.js"></script>
 </body>
 </html>

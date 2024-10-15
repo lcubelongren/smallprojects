@@ -1,0 +1,71 @@
+
+html, body {
+	margin: 0;
+	overflow: hidden;
+	user-select: none;
+	font-size: 2vmin;
+}
+
+#content {
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+}
+#canvas {
+	width: 120vmin;
+	height: 90vmin;
+	background-color: black;
+	z-index: 1;
+}
+
+.slidecontainer {
+	position: absolute;
+	display: flex;
+	flex-direction: row;
+	bottom: 3vh;
+	width: 80vmin;
+}
+.slider {
+	position: relative;
+}
+.year {
+	position: absolute;
+	bottom: -2vh;
+	font-size: 3vh;
+}
+input[type=range]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	pointer-events: all;
+	width: 2vh;
+	height: 2vh;
+	background-color: #fff;
+	border-radius: 50%;
+	box-shadow: 0 0 0 0.2vh lightgray;
+	cursor: pointer;
+}
+input[type=range]::-moz-range-thumb {
+	-webkit-appearance: none;
+	pointer-events: all;
+	width: 2vh;
+	height: 2vh;
+	background-color: #fff;
+	border-radius: 50%;
+	box-shadow: 0 0 0 0.2vh lightgray;
+	cursor: pointer;  
+}
+input[type="range"] {
+	-webkit-appearance: none; 
+	appearance: none;
+	height: 0.6vh;
+	width: 100%;
+	position: absolute;
+	background-color: lightgray;
+	pointer-events: none;
+}
+#yearRangeLow {
+  height: 0;
+  z-index: 1;
+}
