@@ -8,12 +8,18 @@
 <body>
 <div id="content">
 <canvas id="canvas"></canvas>
-<div class="slidecontainer">
-<span id="fromYear" class="year" style="left: -7vmin"></span>
-<input type="range" step="1" class="slider" id="yearRangeHigh">
-<input type="range" step="1" class="slider" id="yearRangeLow">
-<span id="toYear" class="year" style="right: -7vmin"></span>
 </div>
+<div class="slidercontainer">
+<div id="fromYear" class="year" style="text-align: right;"></div>
+<div class="slider">
+<input type="range" id="yearRangeHigh" step="1">
+<input type="range" id="yearRangeLow" step="1">
+</div>
+<div id="toYear" class="year" style="text-align: left;"></div>
+</div>
+<div id="airlineInfo">
+Airline:<br>
+Destinations:
 </div>
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script src="https://unpkg.com/topojson@3"></script>

@@ -42,12 +42,12 @@ for year in range(start_year, end_year + 1):  # T-100 data available for 1990 - 
 airline_counts = {}
 airline_data = {}
 airline_codes = L_UNIQUE_CARRIERS['Code']
-airline_codes = ['UA', 'DL', 'AS', 'AA', 'WN']
+#airline_codes = ['UA', 'DL', 'AS', 'AA', 'WN']
 for year in range(start_year, end_year + 1):
     print('counting for ' + str(year))
     year_data = {}
     for airline_code in airline_codes:
-        #print('counting for ' + L_UNIQUE_CARRIERS['Description'].loc[airline_codes == airline_code].values[0] + ' during ' + year)
+        print('counting for ' + L_UNIQUE_CARRIERS['Description'].loc[airline_codes == airline_code].values[0] + ' during ' + str(year))
         airline_T_T100 = T_T100[(T_T100['YEAR'] == year) &
                                 (T_T100['UNIQUE_CARRIER'] == airline_code) &
                                 (T_T100['DEPARTURES_SCHEDULED'] > 0)]
