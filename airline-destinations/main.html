@@ -8,6 +8,12 @@
 <body>
 <div id="content">
 <canvas id="canvas"></canvas>
+<span id="tooltip"></span>
+<div id="info">
+<div id="info-icon">Choose an airline:</div>
+<div id="info-text">
+</div>
+</div>
 </div>
 <div class="slidercontainer">
 <div id="fromYear" class="year" style="text-align: right;"></div>
@@ -20,6 +26,17 @@
 <div id="airlineInfo">
 Airline:<br>
 Destinations:
+</div>
+<div id="controls">
+<button type="button" id="controls-up">&#8593;</button>
+<br>
+<button type="button" id="controls-left">&#8592;</button>
+<button type="button" id="controls-right">&#8594;</button>
+<br>
+<button type="button" id="controls-down">&#8595;</button>
+<br>
+<button type="button" id="controls-in">&plus;</button>
+<button type="button" id="controls-out">&minus;</button>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script src="https://unpkg.com/topojson@3"></script>
