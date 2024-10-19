@@ -21,7 +21,7 @@ async function main() {
 		let L_UNIQUE_CARRIERS_response = await fetch(L_UNIQUE_CARRIERS_path);
 		let L_UNIQUE_CARRIERS = await L_UNIQUE_CARRIERS_response.text();
 		let airline_lookup = {};
-		for (line of L_UNIQUE_CARRIERS.split('\r\n')) {
+		for (line of L_UNIQUE_CARRIERS.split('\n')) {
 			if (line.split(',').length > 1) {
 				let [code, description] = line.split(',');
 				code = code.replace(/"/g, '');
@@ -34,7 +34,7 @@ async function main() {
 		let L_AIRPORT_response = await fetch(L_AIRPORT_path);
 		let L_AIRPORT = await L_AIRPORT_response.text();
 		let airport_lookup = {};
-		for (line of L_AIRPORT.split('\r\n')) {
+		for (line of L_AIRPORT.split('\n')) {
 			if (line.split('"').length > 3) {
 				let code = line.split('"')[1];
 				let description = line.split('"')[3].split(':')[0];
