@@ -42,13 +42,13 @@ for year in range(start_year, end_year + 1):  # T-100 data available for 1990 - 
 airline_counts = {}
 airline_data = {}
 airline_codes = L_UNIQUE_CARRIERS['Code']
-airline_codes = ['UA', 'DL', 'AS', 'AA', 'WN']
+#airline_codes = ['UA', 'DL', 'AS', 'AA', 'WN']
 for year in range(start_year, end_year + 1):
     print('counting for ' + str(year))
     year_data = {}
     for airline_code in airline_codes:
-        #airline_name = L_UNIQUE_CARRIERS['Description'].loc[airline_codes == airline_code].values[0]
-        #print('counting for ' + airline_name + ' during ' + str(year))
+        airline_name = L_UNIQUE_CARRIERS['Description'].loc[airline_codes == airline_code].values[0]
+        print('counting for ' + airline_name + ' during ' + str(year))
         airline_T_T100 = T_T100[(T_T100['YEAR'] == year) &
                                 (T_T100['UNIQUE_CARRIER'] == airline_code) &
                                 (T_T100['DEPARTURES_SCHEDULED'] > 0)]
@@ -120,8 +120,8 @@ years = list(airline_data.keys())
 colors = plt.colormaps['viridis'](np.linspace(0, 1, len(years)))
 for year,color in zip(years, colors):
     year_data = airline_data[year]
-    lats = [year_data[airline_code][airport_id]['lat'] for airline_code in year_data.keys() for airport_id in year_data[airline_code]]
-    lons = [year_data[airline_code][airport_id]['lon'] for airline_code in year_data.keys() for airport_id in year_data[airline_code]]
+    lats = [year_data[airline_code][airport]['lat'] for airline_code in year_data.keys() for airport in year_data[airline_code].keys() if airport != 'route_pairs']
+    lons = [year_data[airline_code][airport]['lon'] for airline_code in year_data.keys() for airport in year_data[airline_code].keys() if airport != 'route_pairs']
     plt.scatter(lons, lats, transform=ccrs.PlateCarree(), color=color, s=5)
     
 plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)

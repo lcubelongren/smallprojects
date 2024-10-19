@@ -13,6 +13,7 @@ html, body {
 }
 
 #content {
+	position: relative;
 	width: 100vw;
 	height: 90vh;
 	display: flex;
@@ -21,8 +22,15 @@ html, body {
 	overflow: hidden;
 }
 #canvas {
+	position: absolute;
 	background-color: black;
 	z-index: 1;
+}
+#canvasoverlay {
+	position: absolute;
+	background-color: transparent;
+	pointer-events: none;
+	z-index: 2;
 }
 
 #tooltip {
@@ -34,7 +42,7 @@ html, body {
 	border: 0.25vmin solid black;
 	background: white;
 	pointer-events: none;
-	z-index: 4;
+	z-index: 3;
 }
 
 #info {
@@ -91,7 +99,7 @@ html, body {
 	border-style: solid;
 	border-color: black;
 	background-color: white;
-	z-index: 2;
+	z-index: 5;
 }
 .slider {
 	display: flex;
@@ -134,7 +142,7 @@ input[type=range]::-moz-range-thumb {
 }
 #yearRangeLow {
 	background-color: transparent;
-	z-index: 1;
+	z-index: 6;
 }
 #yearRangeHigh {	
 }
@@ -147,7 +155,7 @@ input[type=range]::-moz-range-thumb {
 	color: white;
 	font-size: 4vmin;
 	-webkit-text-stroke: 0.1vmin black;
-	z-index: 3;
+	z-index: 5;
 }
 
 #toggles {
@@ -178,7 +186,7 @@ input[type=range]::-moz-range-thumb {
 	border-style: solid;
 	border-color: black;
 	background-color: white;
-	z-index: 6;
+	z-index: 5;
 }
 #controls > button {
 	width: 8vmin;
