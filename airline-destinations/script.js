@@ -1,17 +1,45 @@
 
-var chosen_airline = 'UA';
+var possible_airlines = ['UA', 'DL', 'AA', 'AS', 'WN'].sort();
+var chosen_airline = possible_airlines[possible_airlines.length * Math.random() | 0]
+var toggle_routes = document.getElementById('toggle-routes').checked;
+var toggle_citystate = document.getElementById('toggle-citystate').checked;
 
 async function main() {
 	
 	async function loadData() {
 
-		let scrape_path = './processing/airline_data.json';
-		const response = await fetch(scrape_path);
-		const data = await response.json();
+		let data_path = './processing/airline_data.json';
+		let data_response = await fetch(data_path);
+		let data = await data_response.json();
 		let years = Object.keys(data);
 		let airline_data = {};
 		for (year of years) {
 			airline_data[year] = data[year];
+		}
+		
+		let L_UNIQUE_CARRIERS_path = './data/lookups/L_UNIQUE_CARRIERS.csv';
+		let L_UNIQUE_CARRIERS_response = await fetch(L_UNIQUE_CARRIERS_path);
+		let L_UNIQUE_CARRIERS = await L_UNIQUE_CARRIERS_response.text();
+		let airline_lookup = {};
+		for (line of L_UNIQUE_CARRIERS.split('\r\n')) {
+			if (line.split(',').length > 1) {
+				let [code, description] = line.split(',');
+				code = code.replace(/"/g, '');
+				description = description.replace(/"/g, '');
+				airline_lookup[code] = description;
+			}
+		}
+		
+		let L_AIRPORT_path = './data/lookups/L_AIRPORT.csv';
+		let L_AIRPORT_response = await fetch(L_AIRPORT_path);
+		let L_AIRPORT = await L_AIRPORT_response.text();
+		let airport_lookup = {};
+		for (line of L_AIRPORT.split('\r\n')) {
+			if (line.split('"').length > 3) {
+				let code = line.split('"')[1];
+				let description = line.split('"')[3].split(':')[0];
+				airport_lookup[code] = description;
+			}
 		}
 		
 		let land_path = './maps/land-50m.json';  // topojson
@@ -28,11 +56,11 @@ async function main() {
 			lake_data = data;
 		})
 
-		return [airline_data, land_data, lake_data];
+		return [airline_data, airline_lookup, airport_lookup, land_data, lake_data];
 
 	}
 	
-	let [airline_data, land_data, lake_data] = await loadData();
+	let [airline_data, airline_lookup, airport_lookup, land_data, lake_data] = await loadData();
 	
 	let all_years = Object.keys(airline_data);
 	
@@ -75,6 +103,32 @@ async function main() {
 			context.strokeStyle = '#a9a9a9';
 			context.lineWidth = 1.5;
 			context.stroke();
+			
+			if (toggle_routes) {
+				context.lineWidth = 0.5;
+				for (airline of Object.keys(airline_data[year])) {
+					let routes_plotted = [];
+					for (year of years) {
+						if ((airline == chosen_airline) & Object.keys(airline_data[year]).includes(airline)) {
+							let color_idx = (year - Math.min(...all_years)) / (all_years.length - 1);
+							context.beginPath();
+							context.strokeStyle = colors(color_idx);
+							for (route of airline_data[year][airline]['route_pairs']) {
+								if (routes_plotted.includes(route) == false) {
+									routes_plotted.push(route);
+									let [airport1, airport2] = route.split('-');
+									let lat1 = airline_data[year][airline][airport1]['lat'];
+									let lon1 = airline_data[year][airline][airport1]['lon'];
+									let lat2 = airline_data[year][airline][airport2]['lat'];
+									let lon2 = airline_data[year][airline][airport2]['lon'];
+									geoGenerator({type: 'LineString', coordinates: [[lon1, lat1], [lon2, lat2]]});
+								}
+							}
+							context.stroke();
+						}
+					}
+				}
+			}
 
 			geoAirport.radius(0.5);
 			context.strokeStyle = 'black';
@@ -100,7 +154,8 @@ async function main() {
 					}
 				}
 				if (airline == chosen_airline) {
-					document.getElementById('airlineInfo').innerText = 'Airline: ' + chosen_airline + '\n' +
+					let chosen_airline_str = airline_lookup[chosen_airline];
+					document.getElementById('airlineInfo').innerText = 'Airline: ' + chosen_airline_str + '\n' +
 																	   'Destinations: ' + airports_plotted.length;
 				}
 			}
@@ -176,7 +231,7 @@ async function main() {
 			for (airline of Object.keys(airline_data[year])) {
 				if ((airline == chosen_airline) & Object.keys(airline_data[year]).includes(airline)) {
 					for (airport of Object.keys(airline_data[year][airline])) {
-						let pointer_distance = 0.0075;
+						let pointer_distance = 0.009;
 						let lat = airline_data[year][airline][airport]['lat'];
 						let lon = airline_data[year][airline][airport]['lon'];
 						if (d3.geoDistance(mouse, [lon, lat]) < pointer_distance) {
@@ -184,7 +239,12 @@ async function main() {
 								if (tooltipOn == true) {
 									tooltipHTML += '<hr>';
 								}
-								tooltipHTML += '<b>' + airport + '</b>';
+								if (toggle_citystate) {
+									tooltipHTML += '<b>' + airport + '</b>' + ' - ' + airport_lookup[airport];
+								}
+								else {
+									tooltipHTML += '<b>' + airport + '</b>';
+								}
 								tooltipAirports.push(airport);
 								tooltipOn = true;
 							}
@@ -224,10 +284,10 @@ async function main() {
 	info.style.transition = '';
 	info.style.visibility = 'visible';
 	let info_text = document.getElementById('info-text');
-	let possible_airlines = ['UA', 'DL', 'AA', 'AS'];
-	info_text.innerHTML = '<br>';
+	info_text.innerHTML = '';
 	for (airline of possible_airlines) {
-		info_text.innerHTML += '<button id="button-' + airline + '" type="button">' + airline + '</button><br>';
+		info_text.innerHTML += '<button id="button-' + airline + '" type="button">' + 
+		                       '(' + airline + ') ' + airline_lookup[airline] + '</button><br>';
 	}
 	for (airline of possible_airlines) {
 		document.getElementById('button-' + airline).addEventListener('click', function (event) {
@@ -235,6 +295,25 @@ async function main() {
 			drawMap(years, chosen_airline);
 		})
 	}
+	
+	document.getElementById('toggle-routes').addEventListener('click', function (event) {
+		if (toggle_routes) {
+			toggle_routes = false;
+		}
+		else {
+			toggle_routes = true;
+		}
+		drawMap(years, chosen_airline);
+	})
+	document.getElementById('toggle-citystate').addEventListener('click', function (event) {
+		if (toggle_citystate) {
+			toggle_citystate = false;
+		}
+		else {
+			toggle_citystate = true;
+		}
+		drawMap(years, chosen_airline);
+	})
 	
 	let rotationMagnitude = 7.5;
 	let scaleMagnitude = 50;

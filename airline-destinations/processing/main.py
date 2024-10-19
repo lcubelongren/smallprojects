@@ -42,16 +42,22 @@ for year in range(start_year, end_year + 1):  # T-100 data available for 1990 - 
 airline_counts = {}
 airline_data = {}
 airline_codes = L_UNIQUE_CARRIERS['Code']
-#airline_codes = ['UA', 'DL', 'AS', 'AA', 'WN']
+airline_codes = ['UA', 'DL', 'AS', 'AA', 'WN']
 for year in range(start_year, end_year + 1):
     print('counting for ' + str(year))
     year_data = {}
     for airline_code in airline_codes:
-        print('counting for ' + L_UNIQUE_CARRIERS['Description'].loc[airline_codes == airline_code].values[0] + ' during ' + str(year))
+        #airline_name = L_UNIQUE_CARRIERS['Description'].loc[airline_codes == airline_code].values[0]
+        #print('counting for ' + airline_name + ' during ' + str(year))
         airline_T_T100 = T_T100[(T_T100['YEAR'] == year) &
                                 (T_T100['UNIQUE_CARRIER'] == airline_code) &
                                 (T_T100['DEPARTURES_SCHEDULED'] > 0)]
-        airport_ids = pd.unique(pd.concat([airline_T_T100['ORIGIN'], airline_T_T100['DEST']]))
+        origins, destinations = airline_T_T100['ORIGIN'], airline_T_T100['DEST']
+        route_pairs = []
+        for origin,destination in pd.unique(pd.Series([(o, d) for o,d in zip(origins, destinations)])):
+            if not (((origin, destination) in route_pairs) or ((destination, origin) in route_pairs)):
+                route_pairs.append(origin + '-' + destination)
+        airport_ids = pd.unique(pd.concat([origins, destinations]))
         airport_count = len(airport_ids)
         aircraft_types = pd.unique(airline_T_T100['AIRCRAFT_TYPE'])
         aircraft_count = len(aircraft_types)
@@ -69,6 +75,7 @@ for year in range(start_year, end_year + 1):
                     lat = 'NaN'
                     lon = 'NaN'
                 year_data[airline_code][airport_id] = {'lat': lat, 'lon': lon}
+                year_data[airline_code]['route_pairs'] = route_pairs
     airline_data[year] = year_data
 
 airport_counts = [airline_counts[airline_code]['airport_count'] for airline_code in airline_counts.keys()]
