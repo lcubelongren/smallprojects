@@ -1,0 +1,29 @@
+
+body {
+	margin: 0;
+	overflow: hidden;
+}
+
+#container {
+	display: flex;
+	flex-flow: column;
+	width: 100vw;
+	height: 100vh;
+}
+
+#image-uploader {
+	width: 100%;
+}
+
+#board-photo {
+	object-fit: contain;
+	overflow: auto;
+	display: inherit;
+}
+
+#processing-canvas {
+	align-self: center;
+	max-width: 100%;
+	max-height: 100%;
+	display: none;
+}

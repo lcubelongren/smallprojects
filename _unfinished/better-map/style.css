@@ -1,0 +1,30 @@
+
+:root {
+	--land-color: #cfe6ad;
+	--water-color: #adcfe6;
+}
+
+html, body {
+	margin: 0;
+	overflow: hidden;
+	user-select: none;
+	font-size: 2vmin;
+	background-color: var(--water-color);
+	touch-action: none;
+}
+
+#content {
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+}
+#canvas {
+	width: calc(100% - 10px);
+	height: calc(100% - 10px);
+	border: 5px solid black;
+	cursor: grab;
+	z-index: 1;
+}

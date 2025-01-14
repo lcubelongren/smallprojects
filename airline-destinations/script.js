@@ -256,9 +256,11 @@ async function main() {
 							}
 							if (toggle_citystate) {
 								tooltipHTML += '<b>' + airport + '</b>' + ' - ' + airport_lookup[airport];
+								tooltip.style.visibility = 'visible';
 							}
 							else {
 								tooltipHTML += '<b>' + airport + '</b>';
+								tooltip.style.visibility = 'hidden';
 							}
 							tooltipAirports.push(airport);
 						}
@@ -278,11 +280,11 @@ async function main() {
 		}
 		let tooltipAirport = d3.geoCircle();
 		let tooltipGenerator = d3.geoPath(projection, contextoverlay);
+		contextoverlay.clearRect(0, 0, canvasoverlay.width, canvasoverlay.height);
 		if (tooltipOn == false) {
 			let tooltipAirports = [];
 			tooltip.innerHTML = '';
 			tooltip.style.display = 'none';
-			contextoverlay.clearRect(0, 0, canvasoverlay.width, canvasoverlay.height);
 		}
 		else {
 			tooltip.innerHTML = tooltipHTML;
@@ -304,22 +306,27 @@ async function main() {
 							let lon2 = airline_data[year][chosen_airline][airport2]['lon'];
 							contextoverlay.beginPath();
 							tooltipGenerator({type: 'LineString', coordinates: [[lon1, lat1], [lon2, lat2]]});
-							contextoverlay.lineWidth = 2.0
-							contextoverlay.strokeStyle = 'black';
+							contextoverlay.lineWidth = 4.0
+							contextoverlay.strokeStyle = d3.scaleSequential(d3.interpolateCool)(0.5);
 							contextoverlay.stroke();
-							contextoverlay.beginPath();
-							contextoverlay.fillStyle = 'black';
+							contextoverlay.fillStyle = d3.scaleSequential(d3.interpolateCool)(0.5);
 							tooltipAirport.radius(0.5);
-							for (airport of tooltipAirports) {
-								let lat = airline_data[year][chosen_airline][airport]['lat'];
-								let lon = airline_data[year][chosen_airline][airport]['lon'];
-								tooltipAirport.center([lon, lat]);
-								tooltipGenerator(tooltipAirport());
-							}
+							tooltipAirport.center([lon2, lat2]);
+							tooltipGenerator(tooltipAirport());
 							contextoverlay.fill()
 						}
 					}
 				}
+			}
+			for (airport of tooltipAirports) {
+				contextoverlay.beginPath();
+				contextoverlay.fillStyle = 'black';
+				tooltipAirport.radius(0.5);
+				let lat = airline_data[year][chosen_airline][airport]['lat'];
+				let lon = airline_data[year][chosen_airline][airport]['lon'];
+				tooltipAirport.center([lon, lat]);
+				tooltipGenerator(tooltipAirport());
+				contextoverlay.fill()
 			}
 		}
 	})
