@@ -309,6 +309,13 @@ async function main() {
 							contextoverlay.lineWidth = 4.0
 							contextoverlay.strokeStyle = d3.scaleSequential(d3.interpolateCool)(0.5);
 							contextoverlay.stroke();
+							contextoverlay.beginPath();
+							contextoverlay.fillStyle = d3.scaleSequential(d3.interpolateCool)(0.5);
+							tooltipAirport.radius(0.5);
+							tooltipAirport.center([lon1, lat1]);
+							tooltipGenerator(tooltipAirport());
+							contextoverlay.fill()
+							contextoverlay.beginPath();
 							contextoverlay.fillStyle = d3.scaleSequential(d3.interpolateCool)(0.5);
 							tooltipAirport.radius(0.5);
 							tooltipAirport.center([lon2, lat2]);
@@ -322,11 +329,16 @@ async function main() {
 				contextoverlay.beginPath();
 				contextoverlay.fillStyle = 'black';
 				tooltipAirport.radius(0.5);
-				let lat = airline_data[year][chosen_airline][airport]['lat'];
-				let lon = airline_data[year][chosen_airline][airport]['lon'];
-				tooltipAirport.center([lon, lat]);
-				tooltipGenerator(tooltipAirport());
-				contextoverlay.fill()
+				for (year of years) {
+					try {
+						let lat = airline_data[year][chosen_airline][airport]['lat'];
+						let lon = airline_data[year][chosen_airline][airport]['lon'];
+						tooltipAirport.center([lon, lat]);
+						tooltipGenerator(tooltipAirport());
+						contextoverlay.fill()
+					} catch {
+					}
+				}
 			}
 		}
 	})
