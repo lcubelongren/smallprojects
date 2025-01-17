@@ -1,9 +1,9 @@
 
 // including airlines from https://en.wikipedia.org/wiki/List_of_airlines_of_the_United_States
 const possible_airlines = {
-	'mainline': ['AA', 'AS', 'B6', 'DL', 'F9', 'G4', 'HA', 'MX', 'NK', 'SY', 'UA', 'WN', 'XP'].sort(),
-	'regional': ['3M', '9E', '9K', 'C5', 'G7', 'MQ', 'OH', 'OO', 'PT', 'QX', 'YV', 'YX', 'ZW'].sort(),
-	'cargo': ['5V', '5X', '7S', 'EM', 'FX', 'KH', 'KO', 'L2', 'M6', 'NC'].sort(),
+	'mainline': ['AA', 'AS', 'B6', 'DL', 'F9', 'G4', 'HA', 'NK', 'SY', 'UA', 'WN'].sort(),
+	'regional': ['9E', 'C5', 'G7', 'MQ', 'OH', 'OO', 'PT', 'QX', 'YV', 'YX', 'ZW'].sort(),
+	'cargo': ['5X', 'FX', 'M6'].sort(),
 };
 const possible_airlines_flat = Object.values(possible_airlines).flat();
 var chosen_airline = possible_airlines_flat[possible_airlines_flat.length * Math.random() | 0];
