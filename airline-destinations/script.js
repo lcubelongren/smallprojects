@@ -65,6 +65,8 @@ async function main() {
 		.then(function(data) {
 			lake_data = data;
 		})
+		
+		document.getElementById('loading-text').remove();
 
 		return [airline_data, airline_lookup, airport_lookup, land_data, lake_data];
 
