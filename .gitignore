@@ -3,5 +3,8 @@
 */__pycache__
 *.pyc
 
+# data folders
+data/
+
 # Google Takeout
-*/Takeout
+.json

@@ -9,9 +9,36 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
 
-change_this_folder_name = 'Takeout\Location History (Timeline)\Records.json'
+fname = 'data/Timeline.json'
+
 
 def gps(fname):
+    with open(fname) as f:
+        data = json.load(f)
+        lats = []
+        lons = []
+        times = []
+        for entry in data['semanticSegments']:
+            # if 'timelinePath' in entry:
+                # for timelinePath in entry['timelinePath']:
+                    # lat, lon = timelinePath['point'].split(', ')
+                    # time = timelinePath['time']
+                    # lats.append(float(lat[:-2]))
+                    # lons.append(float(lon[:-2]))
+                    # times.append(datetime.datetime.strptime(time[:19], '%Y-%m-%dT%H:%M:%S'))
+            if 'activity' in entry:
+                activity = entry['activity']
+                if not activity['topCandidate']['type'] in ['UNKNOWN', 'UNKNOWN_ACTIVITY_TYPE']:
+                    for se in ['start', 'end']:
+                        lat, lon = activity[se]['latLng'].split(', ')
+                        time = entry[se + 'Time']
+                        lats.append(float(lat[:-2]))
+                        lons.append(float(lon[:-2]))
+                        times.append(datetime.datetime.strptime(time[:19], '%Y-%m-%dT%H:%M:%S'))
+    return lats, lons, times
+
+
+def gps_OLD(fname):
     with open(fname) as f:
         data = json.load(f)
         lats = []
@@ -59,6 +86,6 @@ def mapping(lats, lons, times):
 
 
 if __name__ == '__main__':
-    lats, lons, times = gps(change_this_folder_name)
+    lats, lons, times = gps(fname)
     #lats, lons, times = [40],[20],[datetime.datetime.now()]
     mapping(lats, lons, times)
