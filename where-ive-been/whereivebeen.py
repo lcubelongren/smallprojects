@@ -72,7 +72,7 @@ def mapping(lats, lons, times):
     
     timedelta = [(time - times[0]).total_seconds() for time in times]
     plt.scatter(lons, lats, transform=ccrs.PlateCarree(),
-                c=timedelta, s=2, cmap='viridis')
+                c=timedelta, s=8, cmap='viridis')
     
     plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
     plt.savefig('whereivebeen_zoomed.png', transparent=True, bbox_inches='tight')
