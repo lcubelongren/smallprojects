@@ -65,14 +65,15 @@ def mapping(lats, lons, times):
     ax = plt.axes(projection=projection)
     ax.set_global()
     
-    ax.add_feature(cartopy.feature.OCEAN, color='grey')
-    ax.add_feature(cartopy.feature.LAND, color='black')
-    ax.add_feature(cartopy.feature.BORDERS, edgecolor='white', linewidth=0.1)
-    ax.gridlines(xlocs=np.array([-90, 0, 90, 180])-135+twist, ylocs=[], linewidth=0.5, color='w')
+    ax.add_feature(cartopy.feature.OCEAN, color='grey', zorder=0)
+    ax.add_feature(cartopy.feature.LAND, color='black', zorder=1)
+    ax.add_feature(cartopy.feature.LAKES, color='grey', zorder=2)
+    ax.add_feature(cartopy.feature.BORDERS, edgecolor='white', linewidth=0.1, zorder=3)
+    ax.gridlines(xlocs=np.array([-90, 0, 90, 180])-135+twist, ylocs=[], linewidth=0.5, color='w', zorder=4)
     
     timedelta = [(time - times[0]).total_seconds() for time in times]
     plt.scatter(lons, lats, transform=ccrs.PlateCarree(),
-                c=timedelta, s=8, cmap='viridis')
+                c=timedelta, s=8, cmap='viridis', zorder=5)
     
     plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
     plt.savefig('whereivebeen_zoomed.png', transparent=True, bbox_inches='tight')

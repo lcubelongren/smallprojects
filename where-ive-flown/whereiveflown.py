@@ -41,18 +41,19 @@ def mapping(origins, destinations, dates):
     ax = plt.axes(projection=projection)
     ax.set_global()
     
-    ax.add_feature(cartopy.feature.OCEAN, color='grey')
-    ax.add_feature(cartopy.feature.LAND, color='black')
-    ax.add_feature(cartopy.feature.BORDERS, edgecolor='white', linewidth=0.1)
-    ax.gridlines(xlocs=np.array([-90, 0, 90, 180])-135+twist, ylocs=[], linewidth=0.5, color='w')
+    ax.add_feature(cartopy.feature.OCEAN, color='grey', zorder=0)
+    ax.add_feature(cartopy.feature.LAND, color='black', zorder=1)
+    ax.add_feature(cartopy.feature.LAKES, color='grey', zorder=2)
+    ax.add_feature(cartopy.feature.BORDERS, edgecolor='white', linewidth=0.1, zorder=3)
+    ax.gridlines(xlocs=np.array([-90, 0, 90, 180])-135+twist, ylocs=[], linewidth=0.5, color='w', zorder=4)
     
     times = [datetime.datetime.strptime(date, '%Y%m%d') for date in dates]
     timedeltas = [((time - np.min(times))).total_seconds() for time in times]
     cmap = plt.colormaps['viridis']
     colors = cmap(timedeltas / np.max(timedeltas))
     for origin,destination,color in zip(origins, destinations, colors):
-        plt.plot([origin[1], destination[1]], [origin[0], destination[0]],
-                 transform=ccrs.Geodetic(), color=color, marker='o', markevery=[0, -1], markersize=3, linewidth=2)
+        plt.plot([origin[1], destination[1]], [origin[0], destination[0]], transform=ccrs.Geodetic(), 
+                 color=color, marker='o', markevery=[0, -1], markersize=3, linewidth=2, zorder=5)
     plt.scatter([0, 0], [0, 0], transform=ccrs.PlateCarree(), c=[0, 1], s=0, cmap=cmap)  # to make colorbar
 
     plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
