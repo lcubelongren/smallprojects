@@ -1,0 +1,195 @@
+
+html, body {
+	user-select: none;
+	height: 100%;
+	margin: 0;
+	overflow: hidden;
+}
+
+body {
+	display: flex;
+	flex-flow: column;
+	align-items: center;
+}
+
+#board {
+	display: grid;
+	height: 100%;
+	width: auto;
+	margin: 3vmin;
+	outline: 0.3vmin solid black;
+	aspect-ratio: 1 / 1;
+}
+.tile {
+	display: grid;
+	border: 0.3vmin solid black;
+	overflow: hidden;
+}
+.highlight-possible {
+	background-color: lightgray;
+	cursor: pointer;
+}
+.exit {
+	position: absolute;
+	height: 5vmin;
+	width: 2.5vmin;
+	pointer-events: none;
+}
+.exit > .arrow {
+	height: 100%;
+	width: 100%;
+	background-color: blue;
+	opacity: 66%;
+	clip-path: polygon(0% 75%, 50% 50%, 100% 75%,
+	                   75% 75%, 75% 100%,
+					   25% 100%, 25% 75%);
+}
+.exit > hr {
+	position: absolute;
+	width: 4vmin;
+	margin: auto;
+	align-self: center;
+	transform: rotate(90deg) translate(-1.5vmin, 0.75vmin);
+}
+
+#controls {
+	margin-top: 1vmin;
+	visibility: hidden;
+}
+#controls > button {
+	border: 0.3vmin solid black;
+	background-color: transparent;
+	cursor: pointer;
+}
+
+#possible-dice {
+	display: grid;
+	grid-auto-flow: column;
+	grid-column-gap: 1vmin;
+	height: 6vmin;
+	width: auto;
+	justify-content: center; 
+	margin-top: 1vmin;
+	padding-bottom: 1vmin;
+	border-bottom: 0.3vmin solid black;
+	cursor: inherit;
+}
+#rolling-dice {
+	display: block;
+	height: 12vmin;
+	width: auto;
+	margin-top: 1vmin;
+}
+#rolling-dice #start-game {
+	height: 50%;
+	width: auto;
+	border: 0.3vmin solid black;
+	background-color: transparent;
+	cursor: pointer;
+}
+#rolling-dice .die {
+	margin-left: 1vmin;
+	margin-right: 1vmin;
+	cursor: pointer;
+}
+.die {
+	height: 100%;
+	width: auto;
+	aspect-ratio: 1 / 1;
+	background-color: white;
+	border-radius: 10%;
+	padding: 0;
+	border: 0.6vmin solid black;
+	overflow: hidden;
+	cursor: inherit;
+}
+
+.route {
+	display: grid; 
+	grid-template: auto auto / auto auto;
+	height: 100%;
+	width: 100%;
+}
+.route > div {
+	overflow: hidden;
+	pointer-events: none;
+}
+.station {
+	position: absolute;
+	align-self: center;
+	justify-self: center;
+	height: 1.5vmin;
+	width: 1.5vmin;
+	background-color: black;
+}
+.straight-highway {
+	.q1,.q3 { border-right: 0.6vmin solid black; }
+}
+.straight-railway {
+	.q1,.q3 { border-right: 0.6vmin dashed black; }
+}
+.curved-highway {
+	.q4 { outline: 0.6vmin solid black; }
+}
+.curved-railway {
+	.q4 { outline: 0.6vmin dashed black; }
+}
+.t-junction-highway {
+	.q1,.q2 { border-bottom: 0.6vmin solid black; }
+	.q3 { border-right: 0.6vmin solid black; }
+}
+.t-junction-railway {
+	.q1,.q2 { border-bottom: 0.6vmin dashed black; }
+	.q3 { border-right: 0.6vmin dashed black; }
+}
+.t-junction-station-1 {
+	.q1,.q3 { border-right: 0.6vmin solid black; }
+	.q2 { border-bottom: 0.6vmin dashed black; }
+}
+.t-junction-station-2 {
+	.q1,.q3 { border-right: 0.6vmin dashed black; }
+	.q2 { border-bottom: 0.6vmin solid black; }
+}
+.straight-station {
+	.q3 { border-right: 0.6vmin dashed black; }
+	.q1 { border-right: 0.6vmin solid black; }
+}
+.curved-station {
+	.q3 { border-right: 0.6vmin dashed black; }
+	.q2 { border-bottom: 0.6vmin solid black; }
+}
+.double-curved-highway {
+	.q1,.q4 { 
+		border: 0.3vmin solid black;
+		border-radius: 50%;
+	}
+	.q1 { transform: scale(2) translate(-25%, -25%); }
+	.q4 { transform: scale(2) translate( 25%,  25%); }
+}
+.double-curved-railway {
+	.q1,.q4 { 
+		border: 0.3vmin dashed black;
+		border-radius: 50%;
+	}
+	.q1 { transform: scale(2) translate(-25%, -25%); }
+	.q4 { transform: scale(2) translate( 25%,  25%); }
+}
+.dead-end-highway {
+	.q1 { border-bottom: 0.6vmin solid black; }
+}
+.dead-end-railway {
+	.q1 { border-bottom: 0.6vmin dashed black; }
+}
+.overpass {
+	.q1,.q2 { border-bottom: 0.6vmin dashed black; }
+	.q1,.q3 { border-right: 0.6vmin solid black; }
+	.tunnel {
+		position: absolute;
+		align-self: center;
+		justify-self: center;
+		height: 3vmin;
+		width: 1vmin;
+		border-left: 0.3vmin solid black;
+		border-right: 0.3vmin solid black;
+	}
+}
