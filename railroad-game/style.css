@@ -101,7 +101,7 @@ body {
 	padding: 0;
 	border: 0.6vmin solid black;
 	overflow: hidden;
-	cursor: inherit;
+	pointer-events: none;
 }
 
 .route {
@@ -109,6 +109,7 @@ body {
 	grid-template: auto auto / auto auto;
 	height: 100%;
 	width: 100%;
+	pointer-events: auto;
 }
 .route > div {
 	overflow: hidden;

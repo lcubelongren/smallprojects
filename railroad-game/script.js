@@ -64,7 +64,7 @@ let routeDict = {
 		'type': { 'top': 'road', 'right': 'rail', 'bottom': 'road', 'left': 'rail' },
 	},
 };
-let transformed_routeDict = structuredClone(routeDict);
+var transformed_routeDict = structuredClone(routeDict);
 
 let possible_dice = document.getElementById('possible-dice');
 for (let route of Object.values(routeDict)) {
@@ -300,6 +300,7 @@ function placeRoute(event) {
 }
 
 function controlDice(action) {
+	let modified = [];
 	for (let rolling_die of document.getElementById('rolling-dice').children) {
 		let route = rolling_die.children[0].classList[1];
 		transformed_routeDict_route = structuredClone(transformed_routeDict[route]);
@@ -309,17 +310,21 @@ function controlDice(action) {
 		}
 		if (action == 'rotate-left') {
 			rolling_die.style.rotate = current_rotation - 90 + 'deg';
-			transformed_routeDict[route]['type']['top'] = transformed_routeDict_route['type']['right'];
-			transformed_routeDict[route]['type']['right'] = transformed_routeDict_route['type']['bottom'];
-			transformed_routeDict[route]['type']['bottom'] = transformed_routeDict_route['type']['left'];
-			transformed_routeDict[route]['type']['left'] = transformed_routeDict_route['type']['top'];
+			if (!modified.includes(route)) {
+				transformed_routeDict[route]['type']['top'] = transformed_routeDict_route['type']['right'];
+				transformed_routeDict[route]['type']['right'] = transformed_routeDict_route['type']['bottom'];
+				transformed_routeDict[route]['type']['bottom'] = transformed_routeDict_route['type']['left'];
+				transformed_routeDict[route]['type']['left'] = transformed_routeDict_route['type']['top'];
+			}
 		}
 		if (action == 'rotate-right') {
 			rolling_die.style.rotate = current_rotation + 90 + 'deg';
-			transformed_routeDict[route]['type']['top'] = transformed_routeDict_route['type']['left'];
-			transformed_routeDict[route]['type']['right'] = transformed_routeDict_route['type']['top'];
-			transformed_routeDict[route]['type']['bottom'] = transformed_routeDict_route['type']['right'];
-			transformed_routeDict[route]['type']['left'] = transformed_routeDict_route['type']['bottom'];
+			if (!modified.includes(route)) {
+				transformed_routeDict[route]['type']['top'] = transformed_routeDict_route['type']['left'];
+				transformed_routeDict[route]['type']['right'] = transformed_routeDict_route['type']['top'];
+				transformed_routeDict[route]['type']['bottom'] = transformed_routeDict_route['type']['right'];
+				transformed_routeDict[route]['type']['left'] = transformed_routeDict_route['type']['bottom'];
+			}
 		}
 		if (action == 'mirror-axis') {
 			let current_transform = rolling_die.style.transform;
@@ -329,8 +334,11 @@ function controlDice(action) {
 				let new_scaleX = parseInt(current_transform.split('scale(')[1].split(',')[0]) * -1;
 				rolling_die.style.transform = 'scale(' + new_scaleX + ', 1)';
 			}
-			transformed_routeDict[route]['type']['right'] = transformed_routeDict_route['type']['left'];
-			transformed_routeDict[route]['type']['left'] = transformed_routeDict_route['type']['right'];
+			if (!modified.includes(route)) {
+				transformed_routeDict[route]['type']['right'] = transformed_routeDict_route['type']['left'];
+				transformed_routeDict[route]['type']['left'] = transformed_routeDict_route['type']['right'];
+			}
 		}
+		modified.push(route);
 	}
 }
