@@ -12,17 +12,21 @@ body {
 	align-items: center;
 }
 
-#board {
+#board-container {
 	display: grid;
 	height: 100%;
 	width: auto;
-	margin: 3vmin;
-	outline: 0.3vmin solid black;
+}
+#board {
+	display: grid;
+	max-width: 90vmin;
 	aspect-ratio: 1 / 1;
+	margin: 3vmin;
+	outline: 0.2vmin solid black;
 }
 .tile {
 	display: grid;
-	border: 0.3vmin solid black;
+	border: 0.2vmin solid black;
 	overflow: hidden;
 }
 .highlight-possible {
@@ -47,14 +51,30 @@ body {
 .exit > hr {
 	position: absolute;
 	width: 4vmin;
-	margin: auto;
 	align-self: center;
+	margin: auto;
+	border-bottom-color: black;
+	border-bottom-width: 0.6vmin;
+	border-left-width: 0;
+	border-top-width: 0;
+	border-right-width: 0;
 	transform: rotate(90deg) translate(-1.5vmin, 0.75vmin);
 }
 
-#controls {
-	margin-top: 1vmin;
+#toolbar {
 	visibility: hidden;
+}
+#toolbar #round {
+	position: absolute;
+	height: inherit;
+}
+#controls {
+	display: grid;
+	grid-auto-flow: column;
+	grid-column-gap: 1vmin;
+	width: 90vmin;
+	justify-content: center;
+	margin-top: 1vmin;
 }
 #controls > button {
 	border: 0.3vmin solid black;
@@ -67,7 +87,7 @@ body {
 	grid-auto-flow: column;
 	grid-column-gap: 1vmin;
 	height: 6vmin;
-	width: auto;
+	width: 90vmin;
 	justify-content: center; 
 	margin-top: 1vmin;
 	padding-bottom: 1vmin;
@@ -112,6 +132,10 @@ body {
 	pointer-events: auto;
 }
 .route > div {
+	border-width: 0.6vmin;
+	outline-width: 0.6vmin;
+	border-color: black;
+	outline-color: black;
 	overflow: hidden;
 	pointer-events: none;
 }
@@ -124,44 +148,45 @@ body {
 	background-color: black;
 }
 .straight-highway {
-	.q1,.q3 { border-right: 0.6vmin solid black; }
+	.q1,.q3 { border-right-style: solid; }
 }
 .straight-railway {
-	.q1,.q3 { border-right: 0.6vmin dashed black; }
+	.q1,.q3 { border-right-style: dashed; }
 }
 .curved-highway {
-	.q4 { outline: 0.6vmin solid black; }
+	.q4 { outline-style: solid; }
 }
 .curved-railway {
-	.q4 { outline: 0.6vmin dashed black; }
+	.q4 { outline-style: dashed; }
 }
 .t-junction-highway {
-	.q1,.q2 { border-bottom: 0.6vmin solid black; }
-	.q3 { border-right: 0.6vmin solid black; }
+	.q1,.q2 { border-bottom-style: solid; }
+	.q3 { border-right-style: solid; }
 }
 .t-junction-railway {
-	.q1,.q2 { border-bottom: 0.6vmin dashed black; }
-	.q3 { border-right: 0.6vmin dashed black; }
+	.q1,.q2 { border-bottom-style: dashed; }
+	.q3 { border-right-style: dashed; }
 }
 .t-junction-station-1 {
-	.q1,.q3 { border-right: 0.6vmin solid black; }
-	.q2 { border-bottom: 0.6vmin dashed black; }
+	.q1,.q3 { border-right-style: solid; }
+	.q2 { border-bottom-style: dashed; }
 }
 .t-junction-station-2 {
-	.q1,.q3 { border-right: 0.6vmin dashed black; }
-	.q2 { border-bottom: 0.6vmin solid black; }
+	.q1,.q3 { border-right-style: dashed; }
+	.q2 { border-bottom-style: solid; }
 }
 .straight-station {
-	.q3 { border-right: 0.6vmin dashed black; }
-	.q1 { border-right: 0.6vmin solid black; }
+	.q3 { border-right-style: dashed; }
+	.q1 { border-right-style: solid; }
 }
 .curved-station {
-	.q3 { border-right: 0.6vmin dashed black; }
-	.q2 { border-bottom: 0.6vmin solid black; }
+	.q3 { border-right-style: dashed; }
+	.q2 { border-bottom-style: solid; }
 }
 .double-curved-highway {
 	.q1,.q4 { 
-		border: 0.3vmin solid black;
+		border-style: solid;
+		border-width: 0.3vmin;
 		border-radius: 50%;
 	}
 	.q1 { transform: scale(2) translate(-25%, -25%); }
@@ -169,28 +194,31 @@ body {
 }
 .double-curved-railway {
 	.q1,.q4 { 
-		border: 0.3vmin dashed black;
+		border-style: dashed;
+		border-width: 0.3vmin;
 		border-radius: 50%;
 	}
 	.q1 { transform: scale(2) translate(-25%, -25%); }
 	.q4 { transform: scale(2) translate( 25%,  25%); }
 }
 .dead-end-highway {
-	.q1 { border-bottom: 0.6vmin solid black; }
+	.q1 { border-bottom-style: solid; }
 }
 .dead-end-railway {
-	.q1 { border-bottom: 0.6vmin dashed black; }
+	.q1 { border-bottom-style: dashed; }
 }
 .overpass {
-	.q1,.q2 { border-bottom: 0.6vmin dashed black; }
-	.q1,.q3 { border-right: 0.6vmin solid black; }
+	.q1,.q2 { border-bottom-style: dashed; }
+	.q1,.q3 { border-right-style: solid; }
 	.tunnel {
 		position: absolute;
 		align-self: center;
 		justify-self: center;
 		height: 3vmin;
 		width: 1vmin;
-		border-left: 0.3vmin solid black;
-		border-right: 0.3vmin solid black;
+		border-left-style: solid;
+		border-left-width: 0.3vmin;
+		border-right-style: solid;
+		border-right-width: 0.3vmin;
 	}
 }

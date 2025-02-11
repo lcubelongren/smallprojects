@@ -7,16 +7,21 @@
 </head>
 <body>
 <div id="possible-dice"></div>
+<div id="toolbar">
+<span id="round">Round 0</span>
 <div id="controls">
 <button onclick="controlDice('rotate-left')">Rotate left</button>
 <button onclick="controlDice('mirror-axis')">Mirror axis</button>
 <button onclick="controlDice('rotate-right')">Rotate right</button>
+</div>
 </div>
 <div id="rolling-dice" onclick="">
 <button id="start-game" onclick="startGame()">
 Click here to start game
 </button>
 </div>
+<div id="board-container">
 <div id="board"></div>
+</div>
 </body>
 </html>

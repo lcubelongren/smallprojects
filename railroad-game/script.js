@@ -105,11 +105,10 @@ function renderBoard() {
 		let exit = document.createElement('div');
 		exit.className = 'exit';
 		let line = document.createElement('hr');
-		line.style.border = '0';
 		if (([1, 7].includes(column) & row == 4) | ([2, 6].includes(column) & [1, 7].includes(row))) {
-			line.style.borderBottom = '0.6vmin solid black';
+			line.style.borderBottomStyle = 'solid';
 		} else {
-			line.style.borderBottom = '0.6vmin dashed black';
+			line.style.borderBottomStyle = 'dashed';
 		}
 		let arrow = document.createElement('div');
 		arrow.className = 'arrow';
@@ -190,19 +189,26 @@ function startGame() {
 	board_state['4_0']['right'] = 'road';
 	board_state['2_0']['right'] = 'rail';
 	document.getElementById('start-game').remove();
-	document.getElementById('controls').style.visibility = 'visible';
+	document.getElementById('toolbar').style.visibility = 'visible';
 	newRound();
 }
 
 function newRound() {
-	let transformed_routeDict = structuredClone(routeDict);
-	for (let i = 0; i < 4; i++) {
-		let die = document.createElement('button');
-		die.className = 'die';
-		die.setAttribute('onclick', 'highlightRoutes(event)');
-		document.getElementById('rolling-dice').insertAdjacentElement('beforeend', die);
+	let round = parseInt(document.getElementById('round').innerText.split(' ')[1]) + 1;
+	if (round <= 7) {
+		document.getElementById('round').innerText = 'Round ' + round;
+		let transformed_routeDict = structuredClone(routeDict);
+		for (let i = 0; i < 4; i++) {
+			let die = document.createElement('button');
+			die.className = 'die';
+			die.setAttribute('onclick', 'highlightRoutes(event)');
+			document.getElementById('rolling-dice').insertAdjacentElement('beforeend', die);
+		}
+		rollDice();
+	} else {
+		document.getElementById('round').innerText = 'Game Over';
+		document.getElementById('controls').style.visibility = 'hidden';
 	}
-	rollDice();
 }
 
 function highlightRoutes(event) {
