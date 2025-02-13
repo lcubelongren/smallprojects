@@ -82,19 +82,21 @@ async function rollDice() {
 
 async function diceAnimation(die) {
 	const delay = ms => new Promise(res => setTimeout(res, ms));
-	die.style.border = '1.2vmin solid black';
+	die.style.boxShadow = 'inset black 0 0 0 1vmin';
 	await delay(50);
-	die.style.border = '2.4vmin solid black';
+	die.style.boxShadow = 'inset black 0 0 0 2vmin';
 	await delay(50);
-	die.style.border = '3.6vmin solid black';
+	die.style.boxShadow = 'inset black 0 0 0 3vmin';
 	await delay(50);
-	die.style.border = '3.6vmin solid black';
+	die.style.boxShadow = 'inset black 0 0 0 4vmin';
 	await delay(50);
-	die.style.border = '2.6vmin solid black';
+	die.style.boxShadow = 'inset black 0 0 0 3vmin';
 	await delay(50);
-	die.style.border = '1.2vmin solid black';
+	die.style.boxShadow = 'inset black 0 0 0 2vmin';
 	await delay(50);
-	die.style.border = '0.6vmin solid black';
+	die.style.boxShadow = 'inset black 0 0 0 1vmin';
+	await delay(50);
+	die.style.boxShadow = 'inset black 0 0 0 0';
 }
 
 function renderBoard() {
@@ -107,8 +109,10 @@ function renderBoard() {
 		let line = document.createElement('hr');
 		if (([1, 7].includes(column) & row == 4) | ([2, 6].includes(column) & [1, 7].includes(row))) {
 			line.style.borderBottomStyle = 'solid';
+			line.style.borderTopStyle = 'solid';
 		} else {
 			line.style.borderBottomStyle = 'dashed';
+			line.style.borderTopStyle = 'dashed';
 		}
 		let arrow = document.createElement('div');
 		arrow.className = 'arrow';
@@ -197,7 +201,7 @@ function newRound() {
 	let round = parseInt(document.getElementById('round').innerText.split(' ')[1]) + 1;
 	if (round <= 7) {
 		document.getElementById('round').innerText = 'Round ' + round;
-		let transformed_routeDict = structuredClone(routeDict);
+		transformed_routeDict = structuredClone(routeDict);
 		for (let i = 0; i < 4; i++) {
 			let die = document.createElement('button');
 			die.className = 'die';
@@ -226,6 +230,40 @@ function highlightRoutes(event) {
 }
 
 function findPossible(route, highlight) {
+	
+	function checkForInvalidConnection(neighbor_top, neighbor_right, neighbor_bottom, neighbor_left) {
+		let top_valid = true;
+		let right_valid = true;
+		let bottom_valid = true;
+		let left_valid = true;
+		if ((board_state[neighbor_top]['bottom'] == 'rail') & (transformed_routeDict[route]['type']['top'] == 'road')) {
+			top_valid = false;
+		} else if ((board_state[neighbor_top]['bottom'] == 'road') & (transformed_routeDict[route]['type']['top'] == 'rail')) {
+			top_valid = false;
+		}
+		if ((board_state[neighbor_right]['left'] == 'rail') & (transformed_routeDict[route]['type']['right'] == 'road')) {
+			right_valid = false;
+		} else if ((board_state[neighbor_right]['left'] == 'road') & (transformed_routeDict[route]['type']['right'] == 'rail')) {
+			right_valid = false;
+		}
+		if ((board_state[neighbor_bottom]['top'] == 'rail') & (transformed_routeDict[route]['type']['bottom'] == 'road')) {
+			bottom_valid = false;
+		} else if ((board_state[neighbor_bottom]['top'] == 'road') & (transformed_routeDict[route]['type']['bottom'] == 'rail')) {
+			bottom_valid = false;
+		}
+		if ((board_state[neighbor_left]['right'] == 'rail') & (transformed_routeDict[route]['type']['left'] == 'road')) {
+			left_valid = false;
+		} else if ((board_state[neighbor_left]['right'] == 'road') & (transformed_routeDict[route]['type']['left'] == 'rail')) {
+			left_valid = false;
+		}
+		if (top_valid & right_valid & bottom_valid & left_valid) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
 	for (let tile of document.getElementsByClassName('tile')) {
 		if (highlight == true) {
 			if (!tile.classList.contains('filled')) {
@@ -233,35 +271,37 @@ function findPossible(route, highlight) {
 				let neighbor_right = parseInt(tile.id.split('_')[0]) + '_' + (parseInt(tile.id.split('_')[1]) + 1);
 				let neighbor_bottom = (parseInt(tile.id.split('_')[0]) + 1) + '_' + parseInt(tile.id.split('_')[1]);
 				let neighbor_left = parseInt(tile.id.split('_')[0]) + '_' + (parseInt(tile.id.split('_')[1]) - 1);
-				if (transformed_routeDict[route]['type']['top'] != false) {
-					if (!Object.values(board_state[neighbor_top]).every((x) => x == false)) {
-						if (board_state[neighbor_top]['bottom'] == transformed_routeDict[route]['type']['top']) {
-							tile.classList.add('highlight-possible');
-							tile.setAttribute('onclick', 'placeRoute(event)');
+				if (checkForInvalidConnection(neighbor_top, neighbor_right, neighbor_bottom, neighbor_left)) {
+					if (transformed_routeDict[route]['type']['top'] != false) {
+						if (!Object.values(board_state[neighbor_top]).every((x) => x == false)) {
+							if (board_state[neighbor_top]['bottom'] == transformed_routeDict[route]['type']['top']) {
+								tile.classList.add('highlight-possible');
+								tile.setAttribute('onclick', 'placeRoute(event)');
+							}
 						}
 					}
-				}
-				if (transformed_routeDict[route]['type']['right'] != false) {
-					if (!Object.values(board_state[neighbor_right]).every((x) => x == false)) {
-						if (board_state[neighbor_right]['left'] == transformed_routeDict[route]['type']['right']) {
-							tile.classList.add('highlight-possible');
-							tile.setAttribute('onclick', 'placeRoute(event)');
+					if (transformed_routeDict[route]['type']['right'] != false) {
+						if (!Object.values(board_state[neighbor_right]).every((x) => x == false)) {
+							if (board_state[neighbor_right]['left'] == transformed_routeDict[route]['type']['right']) {
+								tile.classList.add('highlight-possible');
+								tile.setAttribute('onclick', 'placeRoute(event)');
+							}
 						}
 					}
-				}
-				if (transformed_routeDict[route]['type']['bottom'] != false) {
-					if (!Object.values(board_state[neighbor_bottom]).every((x) => x == false)) {
-						if (board_state[neighbor_bottom]['top'] == transformed_routeDict[route]['type']['bottom']) {
-							tile.classList.add('highlight-possible');
-							tile.setAttribute('onclick', 'placeRoute(event)');
+					if (transformed_routeDict[route]['type']['bottom'] != false) {
+						if (!Object.values(board_state[neighbor_bottom]).every((x) => x == false)) {
+							if (board_state[neighbor_bottom]['top'] == transformed_routeDict[route]['type']['bottom']) {
+								tile.classList.add('highlight-possible');
+								tile.setAttribute('onclick', 'placeRoute(event)');
+							}
 						}
 					}
-				}
-				if (transformed_routeDict[route]['type']['left'] != false) {
-					if (!Object.values(board_state[neighbor_left]).every((x) => x == false)) {
-						if (board_state[neighbor_left]['right'] == transformed_routeDict[route]['type']['left']) {
-							tile.classList.add('highlight-possible');
-							tile.setAttribute('onclick', 'placeRoute(event)');
+					if (transformed_routeDict[route]['type']['left'] != false) {
+						if (!Object.values(board_state[neighbor_left]).every((x) => x == false)) {
+							if (board_state[neighbor_left]['right'] == transformed_routeDict[route]['type']['left']) {
+								tile.classList.add('highlight-possible');
+								tile.setAttribute('onclick', 'placeRoute(event)');
+							}
 						}
 					}
 				}
@@ -309,7 +349,7 @@ function controlDice(action) {
 	let modified = [];
 	for (let rolling_die of document.getElementById('rolling-dice').children) {
 		let route = rolling_die.children[0].classList[1];
-		transformed_routeDict_route = structuredClone(transformed_routeDict[route]);
+		let transformed_routeDict_route = structuredClone(transformed_routeDict[route]);
 		let current_rotation = parseInt(rolling_die.style.rotate.split('deg')[0]);
 		if (isNaN(current_rotation)) {
 			current_rotation = 0;
@@ -346,5 +386,9 @@ function controlDice(action) {
 			}
 		}
 		modified.push(route);
+		if (rolling_die.children[0].classList.contains('highlight-possible')) {
+			findPossible(route, highlight=false);
+			findPossible(route, highlight=true);
+		}
 	}
 }

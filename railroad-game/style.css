@@ -50,15 +50,16 @@ body {
 }
 .exit > hr {
 	position: absolute;
-	width: 4vmin;
+	width: 3.25vmin;
 	align-self: center;
 	margin: auto;
 	border-bottom-color: black;
-	border-bottom-width: 0.6vmin;
+	border-bottom-width: 0.3vmin;
+	border-top-color: black;
+	border-top-width: 0.3vmin;
 	border-left-width: 0;
-	border-top-width: 0;
 	border-right-width: 0;
-	transform: rotate(90deg) translate(-1.5vmin, 0.75vmin);
+	transform: rotate(90deg) translate(-1.9vmin, 0.4vmin);
 }
 
 #toolbar {
@@ -132,10 +133,8 @@ body {
 	pointer-events: auto;
 }
 .route > div {
-	border-width: 0.6vmin;
-	outline-width: 0.6vmin;
+	border-width: 0.3vmin;
 	border-color: black;
-	outline-color: black;
 	overflow: hidden;
 	pointer-events: none;
 }
@@ -149,67 +148,89 @@ body {
 }
 .straight-highway {
 	.q1,.q3 { border-right-style: solid; }
+	.q2,.q4 { border-left-style: solid; }
 }
 .straight-railway {
 	.q1,.q3 { border-right-style: dashed; }
+	.q2,.q4 { border-left-style: dashed; }
 }
 .curved-highway {
-	.q4 { outline-style: solid; }
+	.q4 { border-left-style: solid; border-top-style: solid; }
+	.q3 { border-right-style: solid; }
+	.q2 { border-bottom-style: solid; }
 }
 .curved-railway {
-	.q4 { outline-style: dashed; }
+	.q4 { border-left-style: dashed; border-top-style: dashed; }
+	.q3 { border-right-style: dashed; }
+	.q2 { border-bottom-style: dashed; }
 }
 .t-junction-highway {
 	.q1,.q2 { border-bottom-style: solid; }
+	.q3,.q4 { border-top-style: solid; }
 	.q3 { border-right-style: solid; }
+	.q4 { border-left-style: solid; }
 }
 .t-junction-railway {
 	.q1,.q2 { border-bottom-style: dashed; }
+	.q3,.q4 { border-top-style: dashed; }
 	.q3 { border-right-style: dashed; }
+	.q4 { border-left-style: dashed; }
 }
 .t-junction-station-1 {
 	.q1,.q3 { border-right-style: solid; }
+	.q2,.q4 { border-left-style: solid; }
 	.q2 { border-bottom-style: dashed; }
+	.q4 { border-top-style: dashed; }
 }
 .t-junction-station-2 {
 	.q1,.q3 { border-right-style: dashed; }
+	.q2,.q4 { border-left-style: dashed; }
 	.q2 { border-bottom-style: solid; }
+	.q4 { border-top-style: solid; }
 }
 .straight-station {
-	.q3 { border-right-style: dashed; }
 	.q1 { border-right-style: solid; }
+	.q2 { border-left-style: solid; }
+	.q3 { border-right-style: dashed; }
+	.q4 { border-left-style: dashed; }
 }
 .curved-station {
-	.q3 { border-right-style: dashed; }
 	.q2 { border-bottom-style: solid; }
+	.q4 { border-top-style: solid; }
+	.q3 { border-right-style: dashed; }
+	.q4 { border-left-style: dashed; }
 }
 .double-curved-highway {
 	.q1,.q4 { 
 		border-style: solid;
-		border-width: 0.3vmin;
+		border-width: 0.25vmin;
 		border-radius: 50%;
 	}
-	.q1 { transform: scale(2) translate(-25%, -25%); }
-	.q4 { transform: scale(2) translate( 25%,  25%); }
+	.q1 { transform: scale(2.2) translate(-25%, -25%); }
+	.q4 { transform: scale(2.2) translate( 25%,  25%); }
 }
 .double-curved-railway {
 	.q1,.q4 { 
 		border-style: dashed;
-		border-width: 0.3vmin;
+		border-width: 0.25vmin;
 		border-radius: 50%;
 	}
-	.q1 { transform: scale(2) translate(-25%, -25%); }
-	.q4 { transform: scale(2) translate( 25%,  25%); }
+	.q1 { transform: scale(2.2) translate(-25%, -25%); }
+	.q4 { transform: scale(2.2) translate( 25%,  25%); }
 }
 .dead-end-highway {
 	.q1 { border-bottom-style: solid; }
+	.q3 { border-top-style: solid; }
 }
 .dead-end-railway {
 	.q1 { border-bottom-style: dashed; }
+	.q3 { border-top-style: dashed; }
 }
 .overpass {
 	.q1,.q2 { border-bottom-style: dashed; }
+	.q3,.q4 { border-top-style: dashed; }
 	.q1,.q3 { border-right-style: solid; }
+	.q2,.q4 { border-left-style: solid; }
 	.tunnel {
 		position: absolute;
 		align-self: center;
