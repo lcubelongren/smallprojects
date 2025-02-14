@@ -230,6 +230,7 @@ function highlightRoutes(event) {
 }
 
 function findPossible(route, highlight) {
+	console.log(board_state)
 	
 	function checkForInvalidConnection(neighbor_top, neighbor_right, neighbor_bottom, neighbor_left) {
 		let top_valid = true;
@@ -381,8 +382,13 @@ function controlDice(action) {
 				rolling_die.style.transform = 'scale(' + new_scaleX + ', 1)';
 			}
 			if (!modified.includes(route)) {
-				transformed_routeDict[route]['type']['right'] = transformed_routeDict_route['type']['left'];
-				transformed_routeDict[route]['type']['left'] = transformed_routeDict_route['type']['right'];
+				if ((current_rotation % 360 == 0) | (current_rotation % 360 == 180)) {
+					transformed_routeDict[route]['type']['right'] = transformed_routeDict_route['type']['left'];
+					transformed_routeDict[route]['type']['left'] = transformed_routeDict_route['type']['right'];
+				} else if ((current_rotation % 360 == 90) | (current_rotation % 360 == 270)) {
+					transformed_routeDict[route]['type']['top'] = transformed_routeDict_route['type']['bottom'];
+					transformed_routeDict[route]['type']['bottom'] = transformed_routeDict_route['type']['top'];
+				}
 			}
 		}
 		modified.push(route);
