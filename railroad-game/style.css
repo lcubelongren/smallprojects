@@ -29,6 +29,11 @@ body {
 	border: 0.2vmin solid black;
 	overflow: hidden;
 }
+.tile-roundnum {
+	position: absolute;
+	grid-column: full;
+	padding: 0.5vmin;
+}
 .highlight-possible {
 	background-color: lightgray;
 	cursor: pointer;

@@ -1,5 +1,6 @@
 
 var board_state = {};
+var current_round = 0;
 
 let subRoute = '<div class="q1"></div><div class="q2"></div><div class="q3"></div><div class="q4"></div>';
 let routeDict = {
@@ -198,9 +199,9 @@ function startGame() {
 }
 
 function newRound() {
-	let round = parseInt(document.getElementById('round').innerText.split(' ')[1]) + 1;
-	if (round <= 7) {
-		document.getElementById('round').innerText = 'Round ' + round;
+	current_round += 1;
+	if (current_round <= 7000) {
+		document.getElementById('round').innerText = 'Round ' + current_round;
 		transformed_routeDict = structuredClone(routeDict);
 		for (let i = 0; i < 4; i++) {
 			let die = document.createElement('button');
@@ -230,7 +231,6 @@ function highlightRoutes(event) {
 }
 
 function findPossible(route, highlight) {
-	console.log(board_state)
 	
 	function checkForInvalidConnection(neighbor_top, neighbor_right, neighbor_bottom, neighbor_left) {
 		let top_valid = true;
@@ -332,6 +332,7 @@ function placeRoute(event) {
 	}
 	let tile = event.target;
 	tile.innerHTML += transformed_routeDict[selected_route]['HTML'];
+	tile.innerHTML += '<span class="tile-roundnum">' + current_round + '</span>';
 	for (let child of tile.children) {
 		if (Object.values(child.classList).includes('route')) {
 			child.style.rotate = selected_rotation + 'deg';
