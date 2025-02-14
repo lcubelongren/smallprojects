@@ -382,10 +382,11 @@ function controlDice(action) {
 				rolling_die.style.transform = 'scale(' + new_scaleX + ', 1)';
 			}
 			if (!modified.includes(route)) {
-				if ((current_rotation % 360 == 0) | (current_rotation % 360 == 180)) {
+				let current_rotation_remainder = Math.abs(current_rotation % 360);
+				if ((current_rotation_remainder == 0) | (current_rotation_remainder == 180)) {
 					transformed_routeDict[route]['type']['right'] = transformed_routeDict_route['type']['left'];
 					transformed_routeDict[route]['type']['left'] = transformed_routeDict_route['type']['right'];
-				} else if ((current_rotation % 360 == 90) | (current_rotation % 360 == 270)) {
+				} else if ((current_rotation_remainder == 90) | (current_rotation_remainder == 270)) {
 					transformed_routeDict[route]['type']['top'] = transformed_routeDict_route['type']['bottom'];
 					transformed_routeDict[route]['type']['bottom'] = transformed_routeDict_route['type']['top'];
 				}
