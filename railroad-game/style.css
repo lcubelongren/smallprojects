@@ -31,8 +31,21 @@ body {
 }
 .tile-roundnum {
 	position: absolute;
-	grid-column: full;
-	padding: 0.5vmin;
+	justify-self: end;
+	padding: 0.75vmin;
+	pointer-events: none;
+}
+.tile-special {
+	position: absolute;
+	width: 3vmin;
+	height: 3vmin;
+	font-size: 1.5vmin;
+	text-align: center;
+	justify-self: start;
+	margin: 0.2vmin;
+	padding: 0.2vmin;
+	box-sizing: border-box;
+	pointer-events: none;
 }
 .highlight-possible {
 	background-color: lightgray;
@@ -70,9 +83,8 @@ body {
 #toolbar {
 	visibility: hidden;
 }
-#toolbar #round {
+#counters {
 	position: absolute;
-	height: inherit;
 }
 #controls {
 	display: grid;
