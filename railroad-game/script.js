@@ -1,6 +1,9 @@
 
 var board_state = {};
 var current_round = 0;
+var number_factory = 0;
+var number_university = 0;
+var number_village = 0;
 
 let subRoute = '<div class="q1"></div><div class="q2"></div><div class="q3"></div><div class="q4"></div>';
 let routeDict = {
@@ -171,6 +174,22 @@ function renderBoard() {
 		addExits(tile, column, row);
 		board.insertAdjacentElement('beforeend', tile);
 	}
+
+	for (let tile of document.getElementsByClassName('tile')) {
+		if (['1_1', '5_7', '6_3'].includes(tile.id)) {
+			tile.innerHTML += '<span class="tile-special" style="border: 0.5vmin solid SlateGrey;">F</span>';
+			tile.classList.add('factory')
+		}
+		if (['3_1', '4_4', '5_2', '7_7'].includes(tile.id)) {
+			tile.innerHTML += '<span class="tile-special" style="border: 0.5vmin solid SandyBrown;">U</span>';
+			tile.classList.add('university')
+		}
+		if (['1_3', '2_6', '3_5', '6_5'].includes(tile.id)) {
+			tile.innerHTML += '<span class="tile-special" style="border: 0.5vmin solid CornflowerBlue;">V</span>';
+			tile.classList.add('village')
+		}
+	}	
+
 }
 
 renderBoard();
@@ -340,6 +359,20 @@ function placeRoute(event) {
 		}
 	}
 	tile.classList.add('filled');
+	if (tile.classList.contains('factory')) {
+		number_factory += 1;
+		document.getElementById('number-factory').innerText = 'Factories: ' + number_factory;
+	}
+	if (tile.classList.contains('university')) {
+		number_university += 1;
+		document.getElementById('number-university').innerText = 'Universities: ' + number_university;
+	}
+	if (tile.classList.contains('village')) {
+		if (tile.getElementsByClassName('station').length) {
+			number_village += 1;
+			document.getElementById('number-village').innerText = 'Villages: ' + number_village;
+		}
+	}
 	board_state[tile.id] = transformed_routeDict[selected_route]['type'];
 	findPossible('', highlight=false);
 	if (document.getElementById('rolling-dice').children.length == 0) {
