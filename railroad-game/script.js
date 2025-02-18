@@ -282,6 +282,8 @@ function newRound() {
 		rollDice();
 		if (document.getElementById('special-dice').children.length > 3) {
 			for (let special_die of document.getElementById('special-dice').children) {
+				special_die.style.rotate = '';
+				special_die.style.transform = '';
 				special_die.classList.remove('inactive');
 			}
 		}
