@@ -80,11 +80,11 @@ body {
 	transform: rotate(90deg) translate(-1.9vmin, 0.4vmin);
 }
 
-#toolbar {
-	visibility: hidden;
-}
 #counters {
 	position: absolute;
+	left: 6vmin;
+	top: 12vmin;
+	visibility: hidden;
 }
 #controls {
 	display: grid;
@@ -93,8 +93,18 @@ body {
 	width: 90vmin;
 	justify-content: center;
 	margin-top: 1vmin;
+	visibility: hidden;
 }
 #controls > button {
+	width: 16vmin;
+	height: 4vmin;
+	border: 0.3vmin solid black;
+	background-color: transparent;
+	cursor: pointer;
+}
+#start-game {
+	height: 50%;
+	width: auto;
 	border: 0.3vmin solid black;
 	background-color: transparent;
 	cursor: pointer;
@@ -112,18 +122,27 @@ body {
 	border-bottom: 0.3vmin solid black;
 	cursor: inherit;
 }
+#special-dice {
+	display: block;
+	height: 12vmin;
+	width: auto;
+	margin-top: 1vmin;
+	visibility: hidden;
+}
+#special-dice .die {
+	margin-left: 1vmin;
+	margin-right: 1vmin;
+	cursor: pointer;
+}
+#special-dice .inactive > div {
+	background-color: lightgray;
+	pointer-events: none;
+}
 #rolling-dice {
 	display: block;
 	height: 12vmin;
 	width: auto;
 	margin-top: 1vmin;
-}
-#rolling-dice #start-game {
-	height: 50%;
-	width: auto;
-	border: 0.3vmin solid black;
-	background-color: transparent;
-	cursor: pointer;
 }
 #rolling-dice .die {
 	margin-left: 1vmin;
@@ -259,4 +278,48 @@ body {
 		border-right-style: solid;
 		border-right-width: 0.3vmin;
 	}
+}
+.special-route-1 {
+	.q1,.q2 { border-bottom-style: dashed; }
+	.q3,.q4 { border-top-style: dashed; }
+	.q1,.q3 { border-right-style: dashed; }
+	.q2,.q4 { border-left-style: dashed; }
+}
+.special-route-2 {
+	.q1 { border-bottom-style: solid; }
+	.q3 { border-top-style: solid; }
+	.q2 { border-bottom-style: dashed; }
+	.q4 { border-top-style: dashed; }
+	.q1 { border-right-style: solid; }
+	.q2 { border-left-style: solid; }
+	.q3 { border-right-style: dashed; }
+	.q4 { border-left-style: dashed; }
+}
+.special-route-3 {
+	.q1,.q2 { border-bottom-style: dashed; }
+	.q3,.q4 { border-top-style: dashed; }
+	.q1,.q3 { border-right-style: solid; }
+	.q2,.q4 { border-left-style: solid; }
+}
+.special-route-4 {
+	.q1,.q2 { border-bottom-style: solid; }
+	.q3,.q4 { border-top-style: solid; }
+	.q1 { border-right-style: solid; }
+	.q2 { border-left-style: solid; }
+	.q3 { border-right-style: dashed; }
+	.q4 { border-left-style: dashed; }
+}
+.special-route-5 {
+	.q1,.q2 { border-bottom-style: dashed; }
+	.q3,.q4 { border-top-style: dashed; }
+	.q1 { border-right-style: dashed; }
+	.q2 { border-left-style: dashed; }
+	.q3 { border-right-style: solid; }
+	.q4 { border-left-style: solid; }
+}
+.special-route-6 {
+	.q1,.q2 { border-bottom-style: solid; }
+	.q3,.q4 { border-top-style: solid; }
+	.q1,.q3 { border-right-style: solid; }
+	.q2,.q4 { border-left-style: solid; }
 }

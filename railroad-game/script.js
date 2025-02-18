@@ -6,9 +6,10 @@ var number_university = 0;
 var number_village = 0;
 
 let subRoute = '<div class="q1"></div><div class="q2"></div><div class="q3"></div><div class="q4"></div>';
+
 let routeDict = {
 	'straight-highway': {
-		'HTML': '<div class="route straight-highway">' + subRoute + '</div></div>',
+		'HTML': '<div class="route straight-highway">' + subRoute + '</div>',
 		'type': { 'top': 'road', 'right': false, 'bottom': 'road', 'left': false },
 	},
 	'straight-railway': {
@@ -32,19 +33,19 @@ let routeDict = {
 		'type': { 'top': false, 'right': 'rail', 'bottom': 'rail', 'left': 'rail' },
 	},
 	't-junction-station-1': {
-		'HTML': '<div class="route t-junction-station-1">' + subRoute + '<div class="station"></div>',
+		'HTML': '<div class="route t-junction-station-1">' + subRoute + '<div class="station"></div></div>',
 		'type': { 'top': 'road', 'right': 'rail', 'bottom': 'road', 'left': false },
 	},
 	't-junction-station-2': {
-		'HTML': '<div class="route t-junction-station-2">' + subRoute + '<div class="station"></div>',
+		'HTML': '<div class="route t-junction-station-2">' + subRoute + '<div class="station"></div></div>',
 		'type': { 'top': 'rail', 'right': 'road', 'bottom': 'rail', 'left': false },
 	},
 	'straight-station': {
-		'HTML': '<div class="route straight-station">' + subRoute + '<div class="station"></div>',
+		'HTML': '<div class="route straight-station">' + subRoute + '<div class="station"></div></div>',
 		'type': { 'top': 'road', 'right': false, 'bottom': 'rail', 'left': false },
 	},
 	'curved-station': {
-		'HTML': '<div class="route curved-station">' + subRoute + '<div class="station"></div>',
+		'HTML': '<div class="route curved-station">' + subRoute + '<div class="station"></div></div>',
 		'type': { 'top': false, 'right': 'road', 'bottom': 'rail', 'left': false },
 	},
 	'double-curved-highway': {
@@ -56,30 +57,78 @@ let routeDict = {
 		'type': { 'top': 'rail', 'right': 'rail', 'bottom': 'rail', 'left': 'rail' },
 	},
 	'dead-end-highway': {
-		'HTML': '<div class="route dead-end-highway">' + subRoute + '<div class="station"></div>',
+		'HTML': '<div class="route dead-end-highway">' + subRoute + '<div class="station"></div></div>',
 		'type': { 'top': false, 'right': false, 'bottom': false, 'left': 'road' },
 	},
 	'dead-end-railway': {
-		'HTML': '<div class="route dead-end-railway">' + subRoute + '<div class="station"></div>',
+		'HTML': '<div class="route dead-end-railway">' + subRoute + '<div class="station"></div></div>',
 		'type': { 'top': false, 'right': false, 'bottom': false, 'left': 'rail' },
 	},
 	'overpass': {
-		'HTML': '<div class="route overpass">' + subRoute + '<div class="tunnel"></div>',
+		'HTML': '<div class="route overpass">' + subRoute + '<div class="tunnel"></div></div>',
 		'type': { 'top': 'road', 'right': 'rail', 'bottom': 'road', 'left': 'rail' },
+	},
+
+	'special-route-1': {
+		'HTML': '<div class="route special-route-1">' + subRoute + '</div>',
+		'type': { 'top': 'rail', 'right': 'rail', 'bottom': 'rail', 'left': 'rail' },
+	},
+	'special-route-2': {
+		'HTML': '<div class="route special-route-2">' + subRoute + '<div class="station"></div></div>',
+		'type': { 'top': 'road', 'right': 'rail', 'bottom': 'rail', 'left': 'road' },
+	},
+	'special-route-3': {
+		'HTML': '<div class="route special-route-3">' + subRoute + '<div class="station"></div></div>',
+		'type': { 'top': 'road', 'right': 'rail', 'bottom': 'road', 'left': 'rail' },
+	},
+	'special-route-4': {
+		'HTML': '<div class="route special-route-4">' + subRoute + '<div class="station"></div></div>',
+		'type': { 'top': 'road', 'right': 'road', 'bottom': 'rail', 'left': 'road' },
+	},
+	'special-route-5': {
+		'HTML': '<div class="route special-route-5">' + subRoute + '<div class="station"></div></div>',
+		'type': { 'top': 'road', 'right': 'rail', 'bottom': 'rail', 'left': 'rail' },
+	},
+	'special-route-6': {
+		'HTML': '<div class="route special-route-6">' + subRoute + '</div>',
+		'type': { 'top': 'road', 'right': 'road', 'bottom': 'road', 'left': 'road' },
 	},
 };
 var transformed_routeDict = structuredClone(routeDict);
 
 let possible_dice = document.getElementById('possible-dice');
-for (let route of Object.values(routeDict)) {
-	possible_dice.innerHTML += '<button class="die">' + route['HTML'] + '</button>';
+for (let route_name of Object.keys(routeDict)) {
+	if (route_name.split('-')[0] != 'special') {
+		let route = routeDict[route_name];
+		possible_dice.innerHTML += '<button class="die">' + route['HTML'] + '</button>';
+	}
+}
+
+let special_dice = document.getElementById('special-dice');
+for (let route_name of Object.keys(routeDict)) {
+	if (route_name.split('-')[0] == 'special') {
+		let route = routeDict[route_name];
+		let special_die = document.createElement('button');
+		special_die.className = 'die';
+		special_die.setAttribute('onclick', 'highlightRoutes(event)');
+		special_die.innerHTML = route['HTML'];
+		document.getElementById('special-dice').insertAdjacentElement('beforeend', special_die);
+	}
 }
 
 async function rollDice() {
-	for (let rolling_die of document.getElementById('rolling-dice').children) {
+	let dice_faces = [
+		['straight-highway', 't-junction-highway', 'straight-railway', 't-junction-railway', 'curved-highway', 'curved-railway'],
+		['straight-highway', 't-junction-highway', 'straight-railway', 't-junction-railway', 'curved-highway', 'curved-railway'],
+		['t-junction-highway', 'double-curved-railway', 't-junction-railway', 'double-curved-highway', 'overpass', 'overpass'],
+		['t-junction-station-1', 'straight-station', 't-junction-station-2', 'curved-station', 'dead-end-highway', 'dead-end-railway'],
+	];
+	for (let i = 0; i < 4; i++) {
+		let rolling_die = document.getElementById('rolling-dice').children[i];
 		diceAnimation(rolling_die);
-		let random_idx = Math.floor(Math.random() * Object.keys(routeDict).length);
-		let route = Object.values(routeDict)[random_idx];
+		let random_idx = Math.floor(Math.random() * dice_faces[i].length);
+		let route_name = dice_faces[i][random_idx];
+		let route = routeDict[route_name];
 		rolling_die.innerHTML = route['HTML'];
 	}
 }
@@ -213,7 +262,9 @@ function startGame() {
 	board_state['4_0']['right'] = 'road';
 	board_state['2_0']['right'] = 'rail';
 	document.getElementById('start-game').remove();
-	document.getElementById('toolbar').style.visibility = 'visible';
+	document.getElementById('counters').style.visibility = 'hidden';
+	document.getElementById('controls').style.visibility = 'visible';
+	document.getElementById('special-dice').style.visibility = 'visible';
 	newRound();
 }
 
@@ -229,6 +280,11 @@ function newRound() {
 			document.getElementById('rolling-dice').insertAdjacentElement('beforeend', die);
 		}
 		rollDice();
+		if (document.getElementById('special-dice').children.length > 3) {
+			for (let special_die of document.getElementById('special-dice').children) {
+				special_die.classList.remove('inactive');
+			}
+		}
 	} else {
 		document.getElementById('round').innerText = 'Game Over';
 		document.getElementById('controls').style.visibility = 'hidden';
@@ -350,7 +406,7 @@ function placeRoute(event) {
 		}
 	}
 	let tile = event.target;
-	tile.innerHTML += transformed_routeDict[selected_route]['HTML'];
+	tile.innerHTML += structuredClone(transformed_routeDict[selected_route]['HTML']);
 	tile.innerHTML += '<span class="tile-roundnum">' + current_round + '</span>';
 	for (let child of tile.children) {
 		if (Object.values(child.classList).includes('route')) {
@@ -374,6 +430,11 @@ function placeRoute(event) {
 		}
 	}
 	board_state[tile.id] = structuredClone(transformed_routeDict[selected_route]['type']);
+	if (selected_route.split('-')[0] == 'special') {
+		for (let special_die of document.getElementById('special-dice').children) {
+			special_die.classList.add('inactive');
+		}
+	}
 	findPossible('', highlight=false);
 	if (document.getElementById('rolling-dice').children.length == 0) {
 		newRound();
@@ -382,15 +443,17 @@ function placeRoute(event) {
 
 function controlDice(action) {
 	let modified = [];
-	for (let rolling_die of document.getElementById('rolling-dice').children) {
-		let route = rolling_die.children[0].classList[1];
+	let rolling_dice = Array.from(document.getElementById('rolling-dice').children);
+	let special_dice = Array.from(document.getElementById('special-dice').children);
+	for (let die of rolling_dice.concat(special_dice)) {
+		let route = die.children[0].classList[1];
 		let transformed_routeDict_route = structuredClone(transformed_routeDict[route]);
-		let current_rotation = parseInt(rolling_die.style.rotate.split('deg')[0]);
+		let current_rotation = parseInt(die.style.rotate.split('deg')[0]);
 		if (isNaN(current_rotation)) {
 			current_rotation = 0;
 		}
 		if (action == 'rotate-left') {
-			rolling_die.style.rotate = current_rotation - 90 + 'deg';
+			die.style.rotate = current_rotation - 90 + 'deg';
 			if (!modified.includes(route)) {
 				transformed_routeDict[route]['type']['top'] = transformed_routeDict_route['type']['right'];
 				transformed_routeDict[route]['type']['right'] = transformed_routeDict_route['type']['bottom'];
@@ -399,7 +462,7 @@ function controlDice(action) {
 			}
 		}
 		if (action == 'rotate-right') {
-			rolling_die.style.rotate = current_rotation + 90 + 'deg';
+			die.style.rotate = current_rotation + 90 + 'deg';
 			if (!modified.includes(route)) {
 				transformed_routeDict[route]['type']['top'] = transformed_routeDict_route['type']['left'];
 				transformed_routeDict[route]['type']['right'] = transformed_routeDict_route['type']['top'];
@@ -408,12 +471,12 @@ function controlDice(action) {
 			}
 		}
 		if (action == 'mirror-axis') {
-			let current_transform = rolling_die.style.transform;
+			let current_transform = die.style.transform;
 			if (current_transform == '') {
-				rolling_die.style.transform = 'scale(-1, 1)';
+				die.style.transform = 'scale(-1, 1)';
 			} else {
 				let new_scaleX = parseInt(current_transform.split('scale(')[1].split(',')[0]) * -1;
-				rolling_die.style.transform = 'scale(' + new_scaleX + ', 1)';
+				die.style.transform = 'scale(' + new_scaleX + ', 1)';
 			}
 			if (!modified.includes(route)) {
 				let current_rotation_remainder = Math.abs(current_rotation % 360);
@@ -427,7 +490,7 @@ function controlDice(action) {
 			}
 		}
 		modified.push(route);
-		if (rolling_die.children[0].classList.contains('highlight-possible')) {
+		if (die.children[0].classList.contains('highlight-possible')) {
 			findPossible(route, highlight=false);
 			findPossible(route, highlight=true);
 		}

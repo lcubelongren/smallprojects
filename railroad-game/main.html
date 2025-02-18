@@ -7,7 +7,12 @@
 </head>
 <body>
 <div id="possible-dice"></div>
-<div id="toolbar">
+<div id="special-dice"></div>
+<div id="rolling-dice" onclick="">
+<button id="start-game" onclick="startGame()">
+Click here to start game
+</button>
+</div>
 <div id="counters">
 <span id="round">Round 0</span><br>
 <br>
@@ -20,12 +25,6 @@
 <button onclick="controlDice('rotate-left')">Rotate left</button>
 <button onclick="controlDice('mirror-axis')">Mirror axis</button>
 <button onclick="controlDice('rotate-right')">Rotate right</button>
-</div>
-</div>
-<div id="rolling-dice" onclick="">
-<button id="start-game" onclick="startGame()">
-Click here to start game
-</button>
 </div>
 <div id="board-container">
 <div id="board"></div>
