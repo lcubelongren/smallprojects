@@ -5,13 +5,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-directory = pd.read_csv('data/Boeing_10-K/_directory.txt', index_col=0)
-
+# Create a dictionary of plane delivery count by year.
 count = {}
 years = np.arange(1970, 2025)
 for year in years:
     count[year] = {}
     if (1993 <= year <= 2024):
+        directory = pd.read_csv('data/Boeing_10-K/_directory.txt', index_col=0)
         sheet_name = directory.at[year, 'sheet_name']
         skiprows = directory.at[year, 'skiprows']
         workbook = xlrd.open_workbook('data/Boeing_10-K/10-K_{}_Boeing.xls'.format(year), logfile=open(os.devnull, 'w'))
@@ -48,6 +48,7 @@ for year in years:
             count[year][str(plane)] = int(num)
     #print(year, count[year])
 
+# Combine plane subtypes.
 plane_combos = {}
 target_planes = ['707', '717', '720', '727', '737', '747', '757', '767', '777', '787']
 for target_plane in target_planes:
@@ -72,6 +73,7 @@ for year in years:
             count[year][str(target_plane)] = target_plane_num
     #print(year, count[year])
 
+# Make a list of all planes.
 all_planes = []
 for year in years:
     for plane in count[year].keys():
@@ -80,8 +82,10 @@ for year in years:
         if not (plane in all_planes):
             all_planes.append(plane)
 
+# Make a helper variable for plotting.
 deliveries_unpacked = {plane: [count[year][plane] if plane in count[year].keys() else np.nan for year in years] for plane in all_planes}
 
+# Plot of deliveries over time by plane.
 plt.figure(figsize=(8, 6), dpi=300)
 for plane in np.sort(list(deliveries_unpacked.keys())):
     plt.plot(years, deliveries_unpacked[plane], label=plane)
