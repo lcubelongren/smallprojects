@@ -1,5 +1,5 @@
 
-import os, xlrd, json
+import os, xlrd, simplejson
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -128,6 +128,6 @@ def exportData(count_boeing, count_airbus):
         elif (year in count_airbus.keys()):
             count_all[int(year)] = count_airbus[year]
     with open('exports/preprocessing.json', 'w') as fp:
-        json.dump(count_all , fp, sort_keys=True, indent=4)
+        simplejson.dump(count_all , fp, sort_keys=True, indent=4, ignore_nan=True)
 
 exportData(count_boeing, count_airbus)
