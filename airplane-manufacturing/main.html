@@ -1,14 +1,64 @@
 <!DOCTYPE html>
-<div id="plot"></div>
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script src="https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/regression/2.0.1/regression.js"></script>
 <script type="module">
 
-const url = 'exports/preprocessing.json';
-const response = await fetch(url);
-const data = await response.json();
-console.log(data)
+const response1 = await fetch('exports/preprocessing.json');
+const data = await response1.json();
+
+const response2 = await fetch('data/plane_lengths.json');
+const plane_lengths = await response2.json();
+
+let all_years = [];
+let all_planes = [];
+let data_unpacked = {};
+for (let year of Object.keys(data)) {
+	all_years.push(year);
+	for (let plane of Object.keys(data[year])) {
+		if (!all_planes.includes(plane)) {
+			all_planes.push(plane);
+			data_unpacked[plane] = [];
+		}
+	}
+}
+let max_number = 0;
+for (let year of all_years) {
+	for (let plane of all_planes) {
+		let number = data[year][plane];
+		data_unpacked[plane].push({ 'year': parseInt(year), 'number': number });
+		if (number > max_number) {
+			max_number = number;
+		}
+	}
+}
+
+let max_length = Math.max(...Object.values(plane_lengths));
+for (let plane of all_planes) {
+	const div_plane = document.createElement('div');
+	div_plane.className = 'plane';
+
+	const div_svg = document.createElement('div');
+	const plot_plane = Plot.line(data_unpacked[plane], { x: 'year', y: 'number' }).plot({
+		x: { tickFormat: d3.format('.0f'), labelArrow: 'none', label: '' },
+		y: { tickFormat: d3.format('.0f'), labelArrow: 'none', label: plane, grid: true, domain: [0, max_number] },
+		width: '400',
+		height: '100',
+	});
+	div_svg.append(plot_plane);
+	
+	const div_img = document.createElement('div');
+	const img_plane = document.createElement('img');
+	img_plane.src = 'images/plane.png';
+	img_plane.style.width = String(100 * plane_lengths[plane] / max_length) + '%';
+	img_plane.style.marginRight = String(100 - (100 * plane_lengths[plane] / max_length)) + '%';
+	console.log(img_plane.style.marginRight)
+	div_img.append(img_plane);
+
+	div_plane.append(div_img);
+	div_plane.append(div_svg);
+	document.body.append(div_plane);
+}
 
 </script>
 <style>
@@ -17,8 +67,22 @@ html, body {
 	margin: 0;
 }
 
-#plot > svg {
-
+.plane {
+	display: flex;
+	flex-direction: row;
+}
+.plane > div {
+	width: 50%;
+	height: 15vmax;
+	align-content: center;
+	border-bottom: 0.2vmax solid black;
+}
+.plane > div > img {
+	height: 100%;
+}
+.plane > div > svg {
+	width: 100%;
+	height: 100%;
 }
 
 </style>

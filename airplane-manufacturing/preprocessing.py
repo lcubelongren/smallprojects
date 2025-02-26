@@ -100,12 +100,12 @@ def plotPlanes(count, years, target_planes, name):
     print('Plotting for {}'.format(name))
 
     # Make a helper variable for plotting.
-    deliveries_unpacked = {plane: [count[year][plane] if plane in count[year].keys() else np.nan for year in years] for plane in target_planes}
+    data_unpacked = {plane: [count[year][plane] if plane in count[year].keys() else np.nan for year in years] for plane in target_planes}
 
     # Plot of deliveries over time by plane.
     plt.figure(figsize=(8, 6), dpi=300)
-    for plane in np.sort(list(deliveries_unpacked.keys())):
-        plt.plot(years, deliveries_unpacked[plane], label=plane)
+    for plane in np.sort(list(data_unpacked.keys())):
+        plt.plot(years, data_unpacked[plane], label=plane)
     plt.ylim([0, 700])
     plt.xlim([1955, 2030])
     plt.ylabel('Deliveries per year')
