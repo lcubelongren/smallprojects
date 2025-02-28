@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script src="https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/regression/2.0.1/regression.js"></script>
 <script type="module">
 
 const response1 = await fetch('exports/preprocessing.json');
@@ -33,6 +32,45 @@ for (let year of all_years) {
 	}
 }
 
+let plane_images = {
+	'707': {
+		'src': 'https://upload.wikimedia.org/wikipedia/commons/0/06/Boeing_707-321B_Pan_Am_Freer.jpg',
+		'transform': 'translate(0, -26%)',
+	},
+	'717': {
+		'src': 'https://upload.wikimedia.org/wikipedia/commons/d/d2/Delta_Air_Lines%2C_N991AT%2C_Boeing_717-23S_%2849593115578%29.jpg',
+		'transform': 'translate(0, -22%)',
+	},
+	'727': {
+		'src': 'https://upload.wikimedia.org/wikipedia/commons/5/57/B-727_Iberia_%28cropped%29.jpg',
+		'transform': 'translate(0, -27%)',
+	},
+	'737': {
+		'src': 'https://upload.wikimedia.org/wikipedia/commons/e/e9/South_African_Airlink_Boeing_737-200_Advanced_Smith.jpg',
+		'transform': 'translate(0, -25%)',
+	},
+	'747': {
+		'src': 'https://upload.wikimedia.org/wikipedia/commons/b/b8/B-747_Iberia.jpg',
+		'transform': 'translate(0, -27%)',
+	},
+	'757': {
+		'src': 'https://upload.wikimedia.org/wikipedia/commons/f/f5/N34131_757_United_LIS.jpg',
+		'transform': 'translate(0, -25%)',
+	},
+	'767': {
+		'src': 'https://upload.wikimedia.org/wikipedia/commons/4/43/Delta_Air_Lines_B767-332_N130DL.jpg',
+		'transform': 'translate(0, -25%)',
+	},
+	'777': {
+		'src': 'https://upload.wikimedia.org/wikipedia/commons/3/3c/Cathay_Pacific_Boeing_777-200%3B_B-HNL%40HKG.jpg',
+		'transform': 'translate(0, -28.5%)',
+	},
+	'787': {
+		'src': 'https://upload.wikimedia.org/wikipedia/commons/4/4e/Boeing_787_N1015B_ANA_Airlines_%2827611880663%29_%28cropped%29.jpg',
+		'transform': 'translate(0, -27%)',
+	},
+};
+
 let max_length = Math.max(...Object.values(plane_lengths));
 for (let plane of all_planes) {
 	const div_plane = document.createElement('div');
@@ -40,19 +78,22 @@ for (let plane of all_planes) {
 
 	const div_svg = document.createElement('div');
 	const plot_plane = Plot.line(data_unpacked[plane], { x: 'year', y: 'number' }).plot({
-		x: { tickFormat: d3.format('.0f'), labelArrow: 'none', label: '' },
+		x: { tickFormat: d3.format('.0f'), labelArrow: 'none', label: '', ticks: 7 },
 		y: { tickFormat: d3.format('.0f'), labelArrow: 'none', label: plane, grid: true, domain: [0, max_number] },
 		width: '400',
 		height: '100',
 	});
+	let label = plot_plane.querySelectorAll('[aria-label="y-axis label"]');
+	label[0].children[0].style.fontWeight = 'bold';
 	div_svg.append(plot_plane);
 	
 	const div_img = document.createElement('div');
 	const img_plane = document.createElement('img');
-	img_plane.src = 'images/plane.png';
-	img_plane.style.width = String(100 * plane_lengths[plane] / max_length) + '%';
-	img_plane.style.marginRight = String(100 - (100 * plane_lengths[plane] / max_length)) + '%';
-	console.log(img_plane.style.marginRight)
+	img_plane.src = plane_images[plane]['src'];
+	img_plane.style.transform = plane_images[plane]['transform']
+	//img_plane.src = 'images/planes/' + plane + '.jpg';
+	//img_plane.style.width = String(100 * plane_lengths[plane] / max_length) + '%';
+	//img_plane.style.marginRight = String(100 - (100 * plane_lengths[plane] / max_length)) + '%';
 	div_img.append(img_plane);
 
 	div_plane.append(div_img);
@@ -76,13 +117,19 @@ html, body {
 	height: 15vmax;
 	align-content: center;
 	border-bottom: 0.2vmax solid black;
+	overflow: hidden;
 }
 .plane > div > img {
-	height: 100%;
+	width: 100%;
+	height: auto;
+	border-right: 0.2vmax solid black;
+	box-sizing: border-box;
+	
 }
 .plane > div > svg {
 	width: 100%;
 	height: 100%;
+	padding-left: 1vmax;
 }
 
 </style>
