@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+<head>
+<title>Airplane Manufacturing</title>
+</head>
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script src="https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6"></script>
 <script type="module">
@@ -35,7 +38,7 @@ for (let year of all_years) {
 let plane_images = {
 	'707': {
 		'src': 'https://upload.wikimedia.org/wikipedia/commons/0/06/Boeing_707-321B_Pan_Am_Freer.jpg',
-		'transform': 'translate(0, -26%)',
+		'transform': 'translate(0, -26%) scale(-1, 1)',
 	},
 	'717': {
 		'src': 'https://upload.wikimedia.org/wikipedia/commons/d/d2/Delta_Air_Lines%2C_N991AT%2C_Boeing_717-23S_%2849593115578%29.jpg',
@@ -47,11 +50,11 @@ let plane_images = {
 	},
 	'737': {
 		'src': 'https://upload.wikimedia.org/wikipedia/commons/e/e9/South_African_Airlink_Boeing_737-200_Advanced_Smith.jpg',
-		'transform': 'translate(0, -25%)',
+		'transform': 'translate(0, -25%) scale(-1, 1)',
 	},
 	'747': {
 		'src': 'https://upload.wikimedia.org/wikipedia/commons/b/b8/B-747_Iberia.jpg',
-		'transform': 'translate(0, -27%)',
+		'transform': 'translate(0, -27%) scale(-1, 1)',
 	},
 	'757': {
 		'src': 'https://upload.wikimedia.org/wikipedia/commons/f/f5/N34131_757_United_LIS.jpg',
@@ -59,15 +62,15 @@ let plane_images = {
 	},
 	'767': {
 		'src': 'https://upload.wikimedia.org/wikipedia/commons/4/43/Delta_Air_Lines_B767-332_N130DL.jpg',
-		'transform': 'translate(0, -25%)',
+		'transform': 'translate(0, -25%) scale(-1, 1)',
 	},
 	'777': {
 		'src': 'https://upload.wikimedia.org/wikipedia/commons/3/3c/Cathay_Pacific_Boeing_777-200%3B_B-HNL%40HKG.jpg',
-		'transform': 'translate(0, -28.5%)',
+		'transform': 'translate(0, -28.5%) scale(-1, 1)',
 	},
 	'787': {
 		'src': 'https://upload.wikimedia.org/wikipedia/commons/4/4e/Boeing_787_N1015B_ANA_Airlines_%2827611880663%29_%28cropped%29.jpg',
-		'transform': 'translate(0, -27%)',
+		'transform': 'translate(0, -27%) scale(-1, 1)',
 	},
 };
 
@@ -122,7 +125,6 @@ html, body {
 .plane > div > img {
 	width: 100%;
 	height: auto;
-	border-right: 0.2vmax solid black;
 	box-sizing: border-box;
 	
 }
@@ -130,6 +132,7 @@ html, body {
 	width: 100%;
 	height: 100%;
 	padding-left: 1vmax;
+	border-left: 0.2vmax solid black;
 }
 
 </style>
