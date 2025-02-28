@@ -9,8 +9,8 @@
 const response1 = await fetch('exports/preprocessing.json');
 const data = await response1.json();
 
-const response2 = await fetch('data/plane_lengths.json');
-const plane_lengths = await response2.json();
+//const response2 = await fetch('data/plane_lengths.json');
+//const plane_lengths = await response2.json();
 
 let all_years = [];
 let all_planes = [];
@@ -74,7 +74,7 @@ let plane_images = {
 	},
 };
 
-let max_length = Math.max(...Object.values(plane_lengths));
+//let max_length = Math.max(...Object.values(plane_lengths));
 for (let plane of all_planes) {
 	const div_plane = document.createElement('div');
 	div_plane.className = 'plane';
