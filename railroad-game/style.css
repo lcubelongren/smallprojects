@@ -13,19 +13,19 @@ body {
 }
 
 #board-container {
-	display: grid;
 	height: 100%;
 	width: auto;
+	max-width: 90vmin;
+	aspect-ratio: 1 / 1;
 }
 #board {
 	display: grid;
-	max-width: 90vmin;
-	aspect-ratio: 1 / 1;
 	margin: 3vmin;
 	outline: 0.2vmin solid black;
 }
 .tile {
-	display: grid;
+	display: inline-grid;
+	aspect-ratio: 1 / 1;
 	border: 0.2vmin solid black;
 	overflow: hidden;
 }
@@ -37,8 +37,8 @@ body {
 }
 .tile-special {
 	position: absolute;
-	width: 3vmin;
 	height: 3vmin;
+	width: 3vmin;
 	font-size: 1.5vmin;
 	text-align: center;
 	justify-self: start;
@@ -98,6 +98,7 @@ body {
 #controls > button {
 	width: 16vmin;
 	height: 4vmin;
+	font-size: 2vmin;
 	border: 0.3vmin solid black;
 	background-color: transparent;
 	cursor: pointer;
@@ -105,18 +106,18 @@ body {
 #start-game {
 	height: 50%;
 	width: auto;
+	font-size: 2vmin;
 	border: 0.3vmin solid black;
 	background-color: transparent;
 	cursor: pointer;
 }
 
 #possible-dice {
-	display: grid;
-	grid-auto-flow: column;
-	grid-column-gap: 1vmin;
+	display: flex;
+	flex-flow: row;
+	justify-content: space-between;
 	height: 6vmin;
 	width: 90vmin;
-	justify-content: center; 
 	margin-top: 1vmin;
 	padding-bottom: 1vmin;
 	border-bottom: 0.3vmin solid black;
