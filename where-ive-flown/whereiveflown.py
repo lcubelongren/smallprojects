@@ -13,7 +13,7 @@ from pyairports.airports import Airports
 airports = Airports()
 
 
-change_this_folder_name = r'E:\Archive\collections\Boarding Passes'
+change_this_folder_name = r'E:\Projects\collections\Boarding Passes'
 
 def flights(img_dir):
     img_list = [str(x.stem) for x in Path(img_dir).glob('*_001.png')]
