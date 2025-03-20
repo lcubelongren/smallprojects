@@ -6,6 +6,15 @@ let img_num = 0;
 let img_total = 127;
 let img_mirror = 1;
 let img = document.getElementById('brain-img');
+
+for (let i = 0; i <= img_total; i++) {
+	var preImg = document.createElement('link');
+	preImg.href = 'export/brain_img-' + i + '.png';
+	preImg.rel = 'preload';
+	preImg.as = 'image';
+	document.head.appendChild(preImg);
+}
+
 setInterval(function() {
 	if (Math.floor((img_num + 1) / img_total) > 0) {
 		img_mirror *= -1;
