@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<img id="brain-img" src="export/brain_img-0.png"></img>
+<script>
+
+let img_num = 0;
+let img_total = 127;
+let img_mirror = 1;
+let img = document.getElementById('brain-img');
+setInterval(function() {
+	if (Math.floor((img_num + 1) / img_total) > 0) {
+		img_mirror *= -1;
+	}
+	img_num = (img_num + 1) % img_total;
+	img.src = 'export/brain_img-' + img_num + '.png';
+	img.style.transform = 'scaleX(' + img_mirror + ')';
+}, 100);
+
+</script>
+<style>
+
+html, body {
+	margin: 0;
+}
+
+body {
+	height: 100vh;
+	width: 100vw;
+	display: grid;
+	align-content: center;
+	justify-content: center;
+}
+
+#brain-img {
+	height: auto;
+	width: 70vmin;
+	max-height: 100%;
+	max-width: 100%;
+	border: 2vmin inset black;
+}
+
+</style>

@@ -4,7 +4,12 @@
 *.pyc
 
 # data folders
-data/
+data
 
 # Google Takeout
 .json
+
+# MRI data
+*.dcm
+*.nii
+*.tif
