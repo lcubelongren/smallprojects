@@ -224,7 +224,7 @@ function renderBoard() {
 		board.insertAdjacentElement('beforeend', tile);
 	}
 
-	for (let tile of document.getElementsByClassName('tile')) {
+/* 	for (let tile of document.getElementsByClassName('tile')) {
 		if (['1_1', '5_7', '6_3'].includes(tile.id)) {
 			tile.innerHTML += '<span class="tile-special" style="border: 0.5vmin solid SlateGrey;">F</span>';
 			tile.classList.add('factory')
@@ -237,7 +237,7 @@ function renderBoard() {
 			tile.innerHTML += '<span class="tile-special" style="border: 0.5vmin solid CornflowerBlue;">V</span>';
 			tile.classList.add('village')
 		}
-	}	
+	}	 */
 
 }
 
@@ -416,7 +416,7 @@ function placeRoute(event) {
 			child.style.transform = 'scale(' + selected_transform + ', 1)';
 		}
 	}
-	tile.classList.add('filled');
+ 	tile.classList.add('filled');
 	if (tile.classList.contains('factory')) {
 		number_factory += 1;
 		document.getElementById('number-factory').innerText = 'Factories: ' + number_factory;
