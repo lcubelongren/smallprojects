@@ -183,10 +183,28 @@ async function main() {
 		context.beginPath(), path(iceshelf_data), context.fillStyle = '#e8f4f8', context.fill();
 		context.beginPath(), path(coastline_data), context.strokeStyle = 'black', context.stroke();
 		context.beginPath(), path(graticule()), context.strokeStyle = 'gray', context.stroke();
+		
+		getLocation();
 	
 	}
 	
 	drawMap();
+	
+	//https://www.w3schools.com/js/js_api_geolocation.asp
+	const dot = d3.geoCircle();
+	function getLocation() {
+		if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(updatePosition);
+		} else {
+		}
+		return
+	}
+	function updatePosition(position) {
+		var [lat, lon] = [position.coords.latitude, position.coords.longitude];
+		dot.center([lon, lat]);
+		dot.radius(1500 / (scale * (Math.PI * 2)));
+		context.beginPath(), path(dot()), context.fillStyle = 'tomato', context.fill();
+	}
 
 }
 
