@@ -9,7 +9,9 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
 
-fname = 'data/Timeline.json'
+## to download from Google Maps (as of 2025.07.03)
+## Settings -> Google location settings -> Location services -> Timeline -> Export Timeline data
+fname = 'data/Timeline_20250703.json'
 
 
 def gps(fname):
