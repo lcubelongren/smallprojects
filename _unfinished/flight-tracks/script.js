@@ -1,11 +1,46 @@
 
+// https://geotiffjs.github.io/geotiff.js/
+// https://yangdanny97.github.io/blog/2020/11/26/D3-elevations
+async function loadMap(w, h, clon, clat, bounds) {
+	//const tiff = await d3.buffer('./maps/HYP_HR_SR_OB_DR/HYP_HR_SR_OB_DR.tif')
+	const tiff = await d3.buffer('./maps/GMTED2010N30W120_075/30n120w_20101117_gmted_mea075.tif')
+	.then(buffer => GeoTIFF.fromArrayBuffer(buffer));
+	const image = await tiff.getImage();
+	const image_w = image.getWidth(), image_h = image.getHeight();
+	let ix = Math.floor(((image_w / 360) * 180) + ((image_w / 360) * clon));
+	let iy = Math.floor(((image_h / 180) * 90) - ((image_h / 180) * clat));
+	let sx = Math.floor((image_w / 360) * Math.abs(parseFloat(bounds[0][0]) - parseFloat(bounds[1][0])));
+	let sy = Math.floor((image_h / 180) * Math.abs(parseFloat(bounds[0][1]) - parseFloat(bounds[1][1])));
+	console.log(ix, iy, sx, sy)
+	//const data = await image.readRGB({ window: [ix, iy, ix+sx, iy+sy], interleave: false });
+	const data = await image.readRasters({ bbox: [-110, 35, -100, 40], resX: 0.1, resY: 0.1 });
+	console.log(image.getBoundingBox())
+	console.log(data)
+	const canvas = document.getElementById('canvas');
+	const context = canvas.getContext('2d');
+	// https://stackoverflow.com/questions/13826319/copy-a-2-dimensional-pixel-array-to-a-javascript-canvas
+	var imgData = context.getImageData(0, 0, w, h);
+	var data_tmp = imgData.data;  // the array of RGBA values
+	for(var i = 0; i < h; i++) {
+		for(var j = 0; j < w; j++) {
+			var s = 4 * i * w + 4 * j;  // calculate the index in the array
+			data_tmp[s] = data[0][s];
+			data_tmp[s + 1] = data[0][s];
+			data_tmp[s + 2] = data[0][s];
+			data_tmp[s + 3] = 255;
+			//data_tmp[s + 1] = data[1][s];
+			//data_tmp[s + 2] = data[2][s];
+			//data_tmp[s + 3] = 255;  // fully opaque
+		}
+	}
+	context.putImageData(imgData, 0, 0);
+}
+
 let fnames = [
-	'Flight%20Track%20Log%20%E2%9C%88%20N3927%2005-Feb-2024%20%28PHNL-PHNL%29%20-%20FlightAware.webarchive',
-	'Flight%20Track%20Log%20%E2%9C%88%20N3927%2001-Mar-2024%20%28PHNL-PHNL%29%20-%20FlightAware.webarchive',
-	'Flight%20Track%20Log%20%E2%9C%88%20N3927%2004-Mar-2024%20%28PHIK-PHNL%29%20-%20FlightAware.webarchive',
-	'Flight%20Track%20Log%20%E2%9C%88%20N3927%2020-Mar-2024%20%28PHNL-PHNL%29%20-%20FlightAware.webarchive',
-	'Flight%20Track%20Log%20%E2%9C%88%20N3927%2022-Jun-2024%20%28PHNL-PHNL%29%20-%20FlightAware.webarchive',
-	'Flight%20Track%20Log%20%E2%9C%88%20N65584%2023-Sep-2024%20%28KBJC-KBJC%29%20-%20FlightAware.webarchive',
+	'Flight Track Log ✈ N3517S 03-May-2025 (KBJC-KBJC) - FlightAware.webarchive',
+	'Flight Track Log ✈ N5178S 08-May-2025 (KBJC-KBJC) - FlightAware.webarchive',
+	'Flight Track Log ✈ N5178S 10-May-2025 (KBJC-KFMM) - FlightAware.webarchive',
+	'Flight Track Log ✈ N5178S 10-May-2025 (KFMM-KBJC) - FlightAware.webarchive',
 ];
 
 async function loadData(fnames) {
@@ -50,16 +85,18 @@ async function createTracks() {
 	return tracks;
 }
 
-async function plotTrack(idx) {
+async function plotTracks() {
 	let tracks = await createTracks();
-	let track = tracks[4];
-	let line = {type: 'LineString', coordinates: track};
-	let [clon, clat] = d3.geoCentroid(line);
-	let buffer = 0.55
+	let tracks_merged = [].concat.apply([], tracks);
+	let tracks_merged_line = {type: 'LineString', coordinates: tracks_merged};
+	let buffer = 0
 	const projection = d3.geoOrthographic();
 	const canvas = document.getElementById('canvas');
 	const context = canvas.getContext('2d');
 	const path = d3.geoPath(projection, context);
+	let [clon, clat] = d3.geoCentroid(tracks_merged_line);
+	let bounds = d3.geoBounds(tracks_merged_line);
+	console.log(bounds)
 	let land_path = './maps/ne_10m_land.json';  // geojson
 	let land_data;
 	await d3.json(land_path)
@@ -77,17 +114,22 @@ async function plotTrack(idx) {
 		canvas.width = window.innerWidth;
 		canvas.height = window.innerHeight;
 		projection.rotate([-clon, -clat]);
-		projection.fitSize([canvas.width / (1 + buffer), canvas.height / (1 + buffer)], line)
-		projection.translate([canvas.width / 2, canvas.height / 2]);
+		projection.fitSize([canvas.width / (1 + buffer), canvas.height / (1 + buffer)], tracks_merged_line);
+		//projection.translate([canvas.width / 2, canvas.height / 2]);
 		context.clearRect(0, 0, canvas.width, canvas.height);
-		context.beginPath(), path(land_data), context.fillStyle = '#cfe6ad', context.fill();
-		context.beginPath(), path(coastline_data), context.strokeStyle = 'white', context.stroke();
-		context.beginPath(), path(line), context.strokeStyle = 'black', context.lineWidth = 2, context.stroke();
+		//context.beginPath(), path(land_data), context.fillStyle = '#cfe6ad', context.fill();
+		//context.beginPath(), path(coastline_data), context.strokeStyle = 'white', context.stroke();
+		for (let track of tracks) {
+			let line = {type: 'LineString', coordinates: track};
+			context.beginPath(), path(line), context.strokeStyle = 'black', context.lineWidth = 2, context.stroke();
+		}
+		loadMap(canvas.width * 4, canvas.height * 4, clon, clat, bounds);
 	}
-	drawMap();
+	loadMap(canvas.width * 4, canvas.height * 4, clon, clat, bounds);
+	//drawMap();
 	window.addEventListener('resize', function (event) {
 		drawMap();
 	});
 }
 
-plotTrack();
+plotTracks();

@@ -1,0 +1,76 @@
+<canvas id="topo"></canvas>
+<canvas id="plot"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/d3"></script>
+<script src="https://cdn.jsdelivr.net/npm/geotiff"></script>
+<script src="https://cdn.jsdelivr.net/npm/plotty/dist/plotty.min.js"></script>
+<script>
+(async function() {
+	const tiff = await d3.buffer('./maps/GMTED2010N30W120_075/30n120w_20101117_gmted_mea075.tif')
+	.then(buffer => GeoTIFF.fromArrayBuffer(buffer));
+	const image = await tiff.getImage();
+	const resolution = image.getResolution();
+	//const bbox = [-109.0467, 37, -102.0467, 41];  // state of Colorado
+	const bbox = [-107.0, 38.5, -102.0, 41.5];  // fit flight tracks
+	const parallel_scale = 1 / Math.cos(((bbox[3] + bbox[1]) / 2) * (Math.PI / 180));
+	const width = Math.round(1 * (bbox[2] - bbox[0]) / Math.abs(resolution[0]));
+	const height = Math.round(1 * (bbox[3] - bbox[1]) / Math.abs(resolution[1]));
+	const left = Math.round(Math.abs(image.getOrigin()[0] - bbox[0]) / Math.abs(resolution[0]));
+	const top = Math.round(Math.abs(image.getOrigin()[1] - bbox[3]) / Math.abs(resolution[1]));
+	const window = [left, top, left + width, top + height];
+	const data = await image.readRasters( { window: window, width: width, height: height * parallel_scale } );
+
+	const topo = new plotty.plot({
+		canvas: document.getElementById('topo'),
+		data: data[0],
+		width: width,
+		height: height * parallel_scale,
+		domain: [d3.min(data[0]), d3.max(data[0])],
+		colorScale: 'earth'
+	});
+	topo.render();
+	
+	const plot = document.getElementById('plot');
+	plot.width = width;
+	plot.height = height * parallel_scale;
+	const ctx = plot.getContext('2d');
+	labelAirport(41.1556389, -104.8104722, 'KCYS', ctx, bbox, resolution, parallel_scale);
+	labelAirport(40.4518153, -105.0113258, 'KFNL', ctx, bbox, resolution, parallel_scale);
+	labelAirport(40.4374167, -104.6332222, 'KGXY', ctx, bbox, resolution, parallel_scale);
+	labelAirport(40.3354444, -103.8041667, 'KFMM', ctx, bbox, resolution, parallel_scale);
+	labelAirport(40.1643889, -105.1636389, 'KLMO', ctx, bbox, resolution, parallel_scale);
+	labelAirport(40.0102500, -105.0480833, 'KEIK', ctx, bbox, resolution, parallel_scale);
+	labelAirport(39.9088056, -105.1171944, 'KBJC', ctx, bbox, resolution, parallel_scale);
+	labelAirport(39.5701186, -104.8492931, 'KAPA', ctx, bbox, resolution, parallel_scale);
+	labelAirport(38.8058167, -104.7007764, 'KCOS', ctx, bbox, resolution, parallel_scale);
+})();
+
+function labelAirport(lat, lon, name, ctx, bbox, resolution, parallel_scale) {
+	let [x, y] = coords2pixels(lat, lon, bbox, resolution, parallel_scale);
+	if (name == 'KBJC') {
+		ctx.fillStyle = 'red';
+	}
+	else {
+		ctx.fillStyle = 'black';
+	}
+	let size = 10;
+	ctx.beginPath();
+	ctx.arc(x, y, size, 0, 2 * Math.PI);
+	ctx.fill();
+}
+
+function coords2pixels(lat, lon, bbox, resolution, parallel_scale) {
+	let x = Math.round(1 * Math.abs(lon - bbox[0]) / Math.abs(resolution[0]));
+	let y = Math.round(parallel_scale * Math.abs(lat - bbox[3]) / Math.abs(resolution[1]));
+	return [x, y];
+}
+</script>
+<style>
+body {
+	margin: 0;
+}
+#topo, #plot {
+	position: absolute;
+	width: 100%;
+	height: auto;
+}
+</style>
