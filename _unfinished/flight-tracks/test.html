@@ -43,6 +43,11 @@
 	
 	// Plot the flight tracks
 	
+	var tracks_geojson = {
+		'coordinates': [],
+		'type': 'LineString',
+	};
+	
 	const plot = document.getElementById('plot');
 	plot.width = width;
 	plot.height = height * parallel_scale;
@@ -95,8 +100,7 @@
 				return Array.from(value_indices, (v) => t.slice(t.indexOf('>', v)+1, t.indexOf('</span>', v)));
 			});
 			Array.from(values, (v) => {
-				// [time, lat, lon, heading]
-				flight.push([v[1], v[2], v[4], v[6]]);
+				flight.push([v[1], v[2], v[4], v[6]]);  // [time, lat, lon, heading]
 			});
 			output.push(flight);
 		}
@@ -108,7 +112,8 @@
 		let tracks = [];
 		for (flight of output) {
 			let points = Array.from(flight, (f) => {
-				return [f[2], f[1]];
+				tracks_geojson.coordinates.push([parseFloat(f[2]), parseFloat(f[1])]);  // [lon, lat]
+				return [parseFloat(f[1]), parseFloat(f[2])];
 			});
 			tracks.push(points);
 		}
@@ -121,8 +126,7 @@
 		ctx.lineWidth = 3;
 		let start = true;
 		for (let point of track) {
-			let lat = parseFloat(point[1]);
-			let lon = parseFloat(point[0]);
+			let [lat, lon] = point;
 			let [x, y] = coords2pixels(lat, lon, bbox, resolution, parallel_scale);
 			if (start == true) {
 				ctx.moveTo(x, y);
@@ -140,6 +144,9 @@
 		plotTrack(track, ctx, bbox, resolution, parallel_scale);
 	}
 	
+	let distance_traveled = d3.geoLength(tracks_geojson) * 3444;  // radius of Earth [nautical miles]
+	console.log('Distance traveled:', Math.round(distance_traveled), 'NM')
+	
 	// Plot the airports
 	
 	function labelAirport(lat, lon, name, ctx, bbox, resolution, parallel_scale) {
@@ -156,7 +163,7 @@
 		ctx.strokeSize = 3;
 		ctx.arc(x, y, fillSize, 0, 2 * Math.PI);
 		ctx.fill();
-		ctx.stroke()
+		ctx.stroke();
 	}
 
 	labelAirport(41.1556389, -104.8104722, 'KCYS', ctx, bbox, resolution, parallel_scale);
@@ -186,7 +193,11 @@ body {
 }
 #topo, #plot {
 	position: absolute;
-	width: 100%;
+	width: 95%;
 	height: auto;
+	border: 1.5vmin double black;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
 }
 </style>

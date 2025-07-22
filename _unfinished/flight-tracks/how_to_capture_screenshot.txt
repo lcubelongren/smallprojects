@@ -1,0 +1,1 @@
+Chrome: Developer tools -> Elements -> (right click) <html> -> Capture node screenshot
