@@ -1,5 +1,13 @@
 <canvas id="topo"></canvas>
 <canvas id="plot"></canvas>
+<table id="cbar-table">
+<tr>
+<td><div id="cbar-lowest-elevation"></div></td>
+<td><canvas id="cbar"></canvas></td>
+<td><div id="cbar-highest-elevation"></div></td>
+</tr>
+</table>
+<div id="caption"></div>
 <script src="https://cdn.jsdelivr.net/npm/d3"></script>
 <script src="https://cdn.jsdelivr.net/npm/geotiff"></script>
 <script src="https://cdn.jsdelivr.net/npm/plotty/dist/plotty.min.js"></script>
@@ -12,6 +20,7 @@
 	.then(buffer => GeoTIFF.fromArrayBuffer(buffer));
 	const image = await tiff.getImage();
 	const resolution = image.getResolution();
+	//const bbox = image.getBoundingBox();  // entire data set
 	//const bbox = [-109.0467, 37, -102.0467, 41];  // state of Colorado
 	const bbox = [-107.0, 38.5, -102.0, 41.5];  // fit flight tracks
 	const parallel_scale = 1 / Math.cos(((bbox[3] + bbox[1]) / 2) * (Math.PI / 180));
@@ -25,21 +34,60 @@
 	// https://www.giss.nasa.gov/tools/panoply/colorbars/
 	plotty.addColorScale('NEO_srtm_topography', ['#fdfcfb', '#bcb791', '#839b52', '#598836'], [1, 0.6, 0.3, 0]);
 	// FAA VFR chart colors
-	FAA_VFR_chart_colors = ['#dfe7c4', '#cfdeae', '#fff4db', '#f7e8b8', '#f2d58b', '#e4bf9b', '#e4bf9b', '#b48e3f', '#fefefe'];
+	FAA_VFR_chart_colors = ['#dfe7c4', '#cfdeae', '#fff4db', '#f7e8b8', '#f2d58b', '#e4bf9b', '#eeb47f', '#b48e3f', '#fefefe'];
 	//FAA_VFR_chart_numbers = [0, 0.12, 0.24, 0.36, 0.48, 0.60, 0.72, 0.84, 1];
 	FAA_VFR_chart_numbers = [0, 0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.75, 1];
 	plotty.addColorScale('FAA_VFR_chart', FAA_VFR_chart_colors, FAA_VFR_chart_numbers);
+	// https://github.com/plotly/plotly.js/blob/master/src/components/colorscale/scales.js
+	// https://github.com/geojames/CloudCompareColor/blob/master/CC_GISTEarth.xml
+	//plotty.addColorScale('earth-custom', ['rgb(0,0,130)', 'rgb(0,180,180)', 'rgb(40,210,40)', 'rgb(230,230,50)', 'rgb(120,70,20)', 'rgb(255,255,255)'], [0, 0.1, 0.2, 0.4, 0.6, 1]);
+	
+	let custom_colors = ['rgb(24,65,121)', 'rgb(57,139,104)', 'rgb(130,169,84)', 'rgb(193,163,103)', 'rgb(120,70,20)', 'rgb(255,255,255)'];
+	let custom_numbers = [0, 0.1, 0.2, 0.4, 0.6, 1];
+	plotty.addColorScale('custom', custom_colors, custom_numbers);
+
 	const topo = new plotty.plot({
 		canvas: document.getElementById('topo'),
 		data: data[0],
 		width: width,
 		height: height * parallel_scale,
 		domain: [d3.min(data[0]), d3.max(data[0])],
-		colorScale: 'earth',
+		//colorScale: 'earth',
 		//colorScale: 'NEO_srtm_topography',
 		//colorScale: 'FAA_VFR_chart',
+		colorScale: 'custom',
 	});
 	topo.render();
+
+	let cbar_width = Math.floor(width / 5);
+	let cbar_height = cbar_width / 10;
+	let cbar_data = Array(cbar_height);
+	for (let i = 0; i < cbar_data.length; i++) {
+		cbar_data[i] = new Array(cbar_width);
+		for (let j = 0; j < custom_colors.length; j++) {
+			let value = custom_numbers[j];
+			let start = Math.floor(cbar_width * (custom_numbers[j] + custom_numbers[j - 1]) /	 2);
+			cbar_data[i] = cbar_data[i].fill(value, start);
+		}
+	}
+
+	const cbar = new plotty.plot({
+		canvas: document.getElementById('cbar'),
+		data: cbar_data.flat(),
+		width: cbar_width,
+		height: cbar_height,
+		domain: [0, 1],
+		colorScale: 'custom',
+		useWebGL: false,
+	});
+	cbar.render();
+	
+	document.getElementById('cbar-lowest-elevation').innerHTML += d3.min(data[0]) + ' m';
+	document.getElementById('cbar-highest-elevation').innerHTML += d3.max(data[0]) + ' m';
+	document.getElementById('cbar-lowest-elevation').style.textAlign = 'right';
+	document.getElementById('cbar-highest-elevation').style.textAlign = 'left';
+	document.getElementById('cbar-lowest-elevation').style.padding = '1vmin';
+	document.getElementById('cbar-highest-elevation').style.padding = '1vmin';
 	
 	// Plot the flight tracks
 	
@@ -144,12 +192,13 @@
 		plotTrack(track, ctx, bbox, resolution, parallel_scale);
 	}
 	
-	let distance_traveled = d3.geoLength(tracks_geojson) * 3444;  // radius of Earth [nautical miles]
-	console.log('Distance traveled:', Math.round(distance_traveled), 'NM')
+	var distance_traveled = d3.geoLength(tracks_geojson) * 3444;  // radius of Earth [nautical miles]
 	
 	// Plot the airports
 	
+	airport_number = 0;
 	function labelAirport(lat, lon, name, ctx, bbox, resolution, parallel_scale) {
+		airport_number += 1;
 		let [x, y] = coords2pixels(lat, lon, bbox, resolution, parallel_scale);
 		ctx.beginPath();
 		ctx.strokeStyle = 'black';
@@ -175,7 +224,15 @@
 	labelAirport(39.9088056, -105.1171944, 'KBJC', ctx, bbox, resolution, parallel_scale);
 	labelAirport(39.5701186, -104.8492931, 'KAPA', ctx, bbox, resolution, parallel_scale);
 	labelAirport(38.8058167, -104.7007764, 'KCOS', ctx, bbox, resolution, parallel_scale);
-		
+	
+	document.getElementById('caption').innerHTML += 'Number of airports: ' + airport_number;
+	document.getElementById('caption').innerHTML += ' | ';
+	document.getElementById('caption').innerHTML += 'Number of flights: ' + fnames.length;
+	document.getElementById('caption').innerHTML += ' | ';
+	document.getElementById('caption').innerHTML += 'Distance traveled: ' + Math.round(distance_traveled) + ' NM';
+	document.getElementById('caption').innerHTML += ' | ';
+	document.getElementById('caption').innerHTML += '[' + bbox[0] + ', ' + bbox[2] + '] longitude, [' + bbox[1] + ', ' + bbox[3] + '] latitude';
+
 })();
 
 // Helper functions
@@ -190,14 +247,34 @@ function coords2pixels(lat, lon, bbox, resolution, parallel_scale) {
 <style>
 body {
 	margin: 0;
+	font-family: sans-serif;
+	font-size: 2vmin;
 }
 #topo, #plot {
 	position: absolute;
-	width: 95%;
-	height: auto;
+	width: auto;
+	height: 85%;
 	border: 1.5vmin double black;
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
+}
+#cbar-table {
+	position: absolute;
+	width: 100%;
+	height: auto;
+	table-layout: fixed;
+}
+#cbar {
+	width: 100%;
+	height: 100%;
+	border: 0.2vmin solid black;
+}
+#caption {
+	position: absolute;
+	width: 100%;
+	bottom: 2vmin;
+	text-align: center;
+	overflow: hidden;
 }
 </style>
