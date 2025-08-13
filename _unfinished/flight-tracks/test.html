@@ -101,64 +101,75 @@
 	plot.height = height * parallel_scale;
 	const ctx = plot.getContext('2d');
 
-	let fnames = [
-		'01-Mar-2025 (KBJC-KBJC) - FlightAware.webarchive',
-		'03-May-2025 (KBJC-KBJC) - FlightAware.webarchive',
-		'04-Jul-2025 (KBJC-KBJC) - FlightAware.webarchive',
-		'04-Jun-2025 (KBJC-KBJC) - FlightAware.webarchive',
-		'05-Mar-2025 (KBJC-KBJC) - FlightAware.webarchive',
-		'06-Jun-2025 (KBJC-KBJC) - FlightAware.webarchive',
-		'07-Dec-2024 (KBJC-KBJC) - FlightAware.webarchive',
-		'07-Jun-2025 (KBJC-KBJC) - FlightAware.webarchive',
-		'08-Jan-2025 (KBJC-KBJC) - FlightAware.webarchive',
-		'08-Jun-2025 (KBJC-KBJC) - FlightAware.webarchive',
-		'08-Mar-2025 (KBJC-KBJC) - FlightAware.webarchive',
-		'08-May-2025 (KBJC-KBJC) - FlightAware.webarchive',
-		'09-Jul-2025 (KBJC-KBJC) - FlightAware.webarchive',
-		'10-May-2025 (KBJC-KFMM) - FlightAware.webarchive',
-		'10-May-2025 (KFMM-KBJC) - FlightAware.webarchive',
-		'11-Mar-2025 (KBJC-KBJC) - FlightAware.webarchive',
-		'13-Jul-2025 (KBJC-KBJC) - FlightAware.webarchive',
-		'19-Jun-2025 (KBJC-KBJC) - FlightAware.webarchive',
-		'23-Sep-2024 (KBJC-KBJC) - FlightAware.webarchive',
-		'27-Oct-2024 (KBJC-KBJC) - FlightAware.webarchive',
-		'28-Sep-2024 (KBJC-KBJC) - FlightAware.webarchive',
-		'29-May-2025 (KBJC-KBJC) - FlightAware.webarchive',
+	let fnames = [  // instructor: Sercan Gündoğdu, 16 flights, 30.4 hrs, 25 instrument approaches
+		'FlightAware/03-May-2025 (KBJC-KBJC) - FlightAware.webarchive',
+		'FlightAware/08-May-2025 (KBJC-KBJC) - FlightAware.webarchive',
+		'FlightAware/10-May-2025 (KBJC-KFMM) - FlightAware.webarchive',
+		'FlightAware/10-May-2025 (KFMM-KBJC) - FlightAware.webarchive',
+		'ADS-B Exchange/11-May-2025_N52160-track-EGM96.kml',
+		'FlightAware/29-May-2025 (KBJC-KBJC) - FlightAware.webarchive',
+		'FlightAware/04-Jun-2025 (KBJC-KBJC) - FlightAware.webarchive',
+		'FlightAware/06-Jun-2025 (KBJC-KBJC) - FlightAware.webarchive',
+		'FlightAware/07-Jun-2025 (KBJC-KBJC) - FlightAware.webarchive',
+		'FlightAware/08-Jun-2025 (KBJC-KBJC) - FlightAware.webarchive',
+		'ADS-B Exchange/18-Jun-2025_N736QG-track-EGM96.kml',
+		'FlightAware/19-Jun-2025 (KBJC-KBJC) - FlightAware.webarchive',
+		'FlightAware/04-Jul-2025 (KBJC-KBJC) - FlightAware.webarchive',
+		'ForeFlight/TrackLog_1E4D73CC-79A7-411F-8EE6-74FEA9598F3A.kml',  // 06-Jul-2025
+		'FlightAware/09-Jul-2025 (KBJC-KBJC) - FlightAware.webarchive',
+		'FlightAware/06-Aug-2025 (KBJC-KBJC) - FlightAware.webarchive',
+		'FlightAware/06-Aug-2025 (KBJC-KBJC) - FlightAware 2.webarchive',
 	];
-	
-	async function loadData(fnames) {
+
+	async function processData() {
 		let data = [];
 		for (fname of fnames) {
 			let response = await fetch('data/' + fname);
 			let file = await response.text();
-			data.push(file);
+			let flight = [];
+			if (fname.split('/')[0] == 'FlightAware') {
+				let table_indices = Array.from(file.matchAll(/<tr class="smallrow[1,2]"/g), (m) => m.index);
+				let tables = Array.from(table_indices, (m) => file.slice(m, file.indexOf('</tr>', m)));
+				let values = Array.from(tables, (t) => {
+					let value_indices = Array.from(t.matchAll(/<span/g), (m) => m.index);
+					return Array.from(value_indices, (v) => t.slice(t.indexOf('>', v)+1, t.indexOf('</span>', v)));
+				});
+				Array.from(values, (v) => {
+					flight.push([v[1], v[2], v[4]]);  // [time, lat, lon]
+				});
+			}
+			else if (fname.split('/')[0] == 'ADS-B Exchange') {
+				let table_indices = Array.from(file.matchAll(/<gx:coord >/g), (m) => m.index);
+				let tables = Array.from(table_indices, (m) => file.slice(m, file.indexOf('</gx:coord>', m)));
+				let values = Array.from(tables, (t) => {
+					return t.split('>')[1].split(' ');
+				});
+				Array.from(values, (v) => {
+					flight.push([null, v[1], v[0]]);  // [time, lat, lon]
+				});
+			}
+			else if (fname.split('/')[0] == 'ForeFlight') {
+				let table_indices = Array.from(file.matchAll(/<gx:coord>/g), (m) => m.index);
+				let tables = Array.from(table_indices, (m) => file.slice(m, file.indexOf('</gx:coord>', m)));
+				let values = Array.from(tables, (t) => {
+					return t.split('>')[1].split(' ');
+				});
+				Array.from(values, (v) => {
+					flight.push([null, v[1], v[0]]);  // [time, lat, lon]
+				});
+			}
+			else {
+				console.log('ERROR - File not recognized:', fname)
+			}
+			data.push(flight);
 		}
 		return data;
 	}
 
-	async function processData() {
-		let data = await loadData(fnames);
-		let output = [];
-		for (str of data) {
-			let flight = [];
-			let table_indices = Array.from(str.matchAll(/<tr class="smallrow[1,2]"/g), (m) => m.index);
-			let tables = Array.from(table_indices, (m) => str.slice(m, str.indexOf('</tr>', m)));
-			let values = Array.from(tables, (t) => {
-				let value_indices = Array.from(t.matchAll(/<span/g), (m) => m.index);
-				return Array.from(value_indices, (v) => t.slice(t.indexOf('>', v)+1, t.indexOf('</span>', v)));
-			});
-			Array.from(values, (v) => {
-				flight.push([v[1], v[2], v[4], v[6]]);  // [time, lat, lon, heading]
-			});
-			output.push(flight);
-		}
-		return output;
-	}
-
 	async function createTracks() {
-		let output = await processData();
+		let data = await processData();
 		let tracks = [];
-		for (flight of output) {
+		for (flight of data) {
 			let points = Array.from(flight, (f) => {
 				tracks_geojson.coordinates.push([parseFloat(f[2]), parseFloat(f[1])]);  // [lon, lat]
 				return [parseFloat(f[1]), parseFloat(f[2])];
@@ -227,11 +238,11 @@
 	
 	document.getElementById('caption').innerHTML += 'Number of airports: ' + airport_number;
 	document.getElementById('caption').innerHTML += ' | ';
-	document.getElementById('caption').innerHTML += 'Number of flights: ' + fnames.length;
+	document.getElementById('caption').innerHTML += 'Number of flights: ' + 16;//fnames.length;
 	document.getElementById('caption').innerHTML += ' | ';
 	document.getElementById('caption').innerHTML += 'Distance traveled: ' + Math.round(distance_traveled) + ' NM';
-	document.getElementById('caption').innerHTML += ' | ';
-	document.getElementById('caption').innerHTML += '[' + bbox[0] + ', ' + bbox[2] + '] longitude, [' + bbox[1] + ', ' + bbox[3] + '] latitude';
+	//document.getElementById('caption').innerHTML += ' | ';
+	//document.getElementById('caption').innerHTML += '[' + bbox[0] + ', ' + bbox[2] + '] longitude, [' + bbox[1] + ', ' + bbox[3] + '] latitude';
 
 })();
 
