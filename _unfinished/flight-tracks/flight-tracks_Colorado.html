@@ -101,7 +101,7 @@
 	plot.height = height * parallel_scale;
 	const ctx = plot.getContext('2d');
 
-	let fnames = [  // instructor: Sercan Gündoğdu, 16 flights, 30.4 hrs, 25 instrument approaches
+	let fnames_sercan = [  // instructor: Sercan Gündoğdu, 16 flights, 30.4 hrs, 25 instrument approaches
 		'FlightAware/03-May-2025 (KBJC-KBJC) - FlightAware.webarchive',
 		'FlightAware/08-May-2025 (KBJC-KBJC) - FlightAware.webarchive',
 		'FlightAware/10-May-2025 (KBJC-KFMM) - FlightAware.webarchive',
@@ -120,10 +120,49 @@
 		'FlightAware/06-Aug-2025 (KBJC-KBJC) - FlightAware.webarchive',
 		'FlightAware/06-Aug-2025 (KBJC-KBJC) - FlightAware 2.webarchive',
 	];
+	
+	let fnames_kyler = [  // instructor: Kyler May
+		'ForeFlight/TrackLog_BBD8F165-7F43-4D43-BE27-4856EF4FC57F.kml',  // 19-Jul-2025
+		'ForeFlight/TrackLog_AE158C71-2083-4078-99EE-148F01CAE9B7.kml',  // 21-Jul-2025
+		'ForeFlight/TrackLog_5429E971-FA4C-4774-8402-65A864487A02.kml',  // 23-Jul-2025
+		'ForeFlight/TrackLog_B8FE0002-1D6C-4663-82AD-D1650E5B0852.kml',  // 29-Jul-2025
+		'ForeFlight/TrackLog_2DC020F4-BFBB-4550-969C-407AE6A66C80.kml',  // 31-Jul-2025
+		'ForeFlight/TrackLog_E98C37C9-0FC6-4B2A-A9AF-683B2E63CC3D.kml',  // 11-Aug-2025
+	];
+	
+	let fnames_conrad = [  // instructor: Conrad Beard
+		'ForeFlight/TrackLog_2BFE9177-3B93-4848-A87A-8CDFB100AD59.kml',  // 22-Jul-2025
+		'ForeFlight/TrackLog_1DCAA941-ED50-4646-97A8-F59F792FFC1A.kml',  // 04-Aug-2025
+		'ForeFlight/TrackLog_F6012AF6-7DC9-48F7-9F8F-60FAE1D54DFE.kml',  // 05-Aug-2025
+	];
+	
+	let fnames_solo = [
+		'FlightAware/23-Sep-2024 (KBJC-KBJC) - FlightAware.webarchive',  // instructor: Aidan Johnson
+		'FlightAware/28-Sep-2024 (KBJC-KBJC) - FlightAware.webarchive',
+		'FlightAware/27-Oct-2024 (KBJC-KBJC) - FlightAware.webarchive',
+		'FlightAware/07-Dec-2024 (KBJC-KBJC) - FlightAware.webarchive',
+		'FlightAware/08-Jan-2025 (KBJC-KBJC) - FlightAware.webarchive',
+		'FlightAware/01-Mar-2025 (KBJC-KBJC) - FlightAware.webarchive',
+		'FlightAware/05-Mar-2025 (KBJC-KBJC) - FlightAware.webarchive',
+		'FlightAware/08-Mar-2025 (KBJC-KBJC) - FlightAware.webarchive',
+		'FlightAware/11-Mar-2025 (KBJC-KBJC) - FlightAware.webarchive',
+		'ForeFlight/TrackLog_9846E11C-5C15-4C0C-B706-F16900362677.kml',  // 13-Jul-2025
+		'ForeFlight/TrackLog_4C5DC583-C326-46A9-A637-8CCE09B33F9A.kml',  // 25-Jul-2025 #1
+		'ForeFlight/TrackLog_A4785479-15E1-4E60-8465-FB7D9575658A.kml',  // 25-Jul-2025 #2
+		'ForeFlight/TrackLog_0B27906B-E5DD-4F84-BB74-4F1AB4450666.kml',  // 11-Aug-2025
+		'ForeFlight/TrackLog_08C0E441-6AF5-427B-885E-662291706849.kml',  // 12-Aug-2025 #1
+		'ForeFlight/TrackLog_6F58D79D-F22E-4F97-8086-538938F91BF7.kml',  // 12-Aug-2025 #2
+	];
+	
+	let fnames_all = [];
+	fnames_all = fnames_all.concat(fnames_sercan);
+	fnames_all = fnames_all.concat(fnames_kyler);
+	fnames_all = fnames_all.concat(fnames_conrad);
+	fnames_all = fnames_all.concat(fnames_solo);
 
 	async function processData() {
 		let data = [];
-		for (fname of fnames) {
+		for (fname of fnames_all) {
 			let response = await fetch('data/' + fname);
 			let file = await response.text();
 			let flight = [];
@@ -227,6 +266,7 @@
 	}
 
 	labelAirport(41.1556389, -104.8104722, 'KCYS', ctx, bbox, resolution, parallel_scale);
+	labelAirport(41.0997608, -102.9849931, 'KSNY', ctx, bbox, resolution, parallel_scale);
 	labelAirport(40.4518153, -105.0113258, 'KFNL', ctx, bbox, resolution, parallel_scale);
 	labelAirport(40.4374167, -104.6332222, 'KGXY', ctx, bbox, resolution, parallel_scale);
 	labelAirport(40.3354444, -103.8041667, 'KFMM', ctx, bbox, resolution, parallel_scale);
@@ -234,11 +274,14 @@
 	labelAirport(40.0102500, -105.0480833, 'KEIK', ctx, bbox, resolution, parallel_scale);
 	labelAirport(39.9088056, -105.1171944, 'KBJC', ctx, bbox, resolution, parallel_scale);
 	labelAirport(39.5701186, -104.8492931, 'KAPA', ctx, bbox, resolution, parallel_scale);
+	labelAirport(38.9427697, -104.5699047, 'KFLY', ctx, bbox, resolution, parallel_scale);
 	labelAirport(38.8058167, -104.7007764, 'KCOS', ctx, bbox, resolution, parallel_scale);
+	//labelAirport(38.9040556, -97.2358611, 'K78', ctx, bbox, resolution, parallel_scale);
+	//labelAirport(38.7906111, -97.6522222, 'KSLN', ctx, bbox, resolution, parallel_scale);
 	
 	document.getElementById('caption').innerHTML += 'Number of airports: ' + airport_number;
 	document.getElementById('caption').innerHTML += ' | ';
-	document.getElementById('caption').innerHTML += 'Number of flights: ' + 16;//fnames.length;
+	document.getElementById('caption').innerHTML += 'Number of flights: ' + (fnames_all.length - 2);
 	document.getElementById('caption').innerHTML += ' | ';
 	document.getElementById('caption').innerHTML += 'Distance traveled: ' + Math.round(distance_traveled) + ' NM';
 	//document.getElementById('caption').innerHTML += ' | ';
