@@ -5,24 +5,43 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/regression/2.0.1/regression.js"></script>
 <script type="module">
 
-const url = 'https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_mm_gl.txt';
-const response = await fetch(url);
-const text = await response.text();
-
-let co2_data = [];
-for (let line of text.split('\n')) {
+// source: https://doi.org/10.15138/9N0H-ZH07
+//const NOAA_url = 'https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_mm_gl.txt';
+const NOAA_url = 'data/archive/co2_mm_gl.txt';
+const NOAA_response = await fetch(NOAA_url);
+const NOAA_text = await NOAA_response.text();
+let NOAA_co2_data = [];
+for (let line of NOAA_text.split('\n')) {
 	if (!(line[0] == '#') & line.length > 0) {
 		let line_data = line.split(' ').filter((item) => item != '');
 		let [year, month, decimal, average, average_unc, trend, trend_unc] = line_data;
-		co2_data.push({'date': parseFloat(decimal), 'CO2': parseFloat(average)});
+		NOAA_co2_data.push({'date': parseFloat(decimal), 'CO2': parseFloat(average)});
 	}
 }
-let starting_year = co2_data[0]['date'];
-let latest_year = co2_data[co2_data.length - 1]['date'];
-let latest_co2 = co2_data[co2_data.length - 1]['CO2'];
+
+// source: https://doi.org/10.1038/nature06949
+//const EDC3_url = 'https://www.ncei.noaa.gov/pub/data/paleo/icecore/antarctica/epica_domec/edc3-composite-co2-2008-noaa.txt';
+const EDC3_url = 'data/archive/edc3-composite-co2-2008-noaa.txt';
+const EDC3_response = await fetch(EDC3_url);
+const EDC3_text = await EDC3_response.text();
+let EDC3_co2_data = [];
+for (let line of EDC3_text.split('\n')) {
+	if (!(line[0] == '#') & line.length > 0) {
+		let line_data = line.split('\r')[0].split('\t');
+		let [year_BP, CO2] = line_data;
+		if (!isNaN(year_BP)) {
+			EDC3_co2_data.push({'date': (2008 - parseFloat(year_BP)), 'CO2': parseFloat(CO2)});
+		}
+	}
+}
+
+let starting_year_EDC3 = EDC3_co2_data[EDC3_co2_data.length - 1]['date'];
+let starting_year_NOAA = NOAA_co2_data[0]['date'];
+let latest_year = NOAA_co2_data[NOAA_co2_data.length - 1]['date'];
+let latest_co2 = NOAA_co2_data[NOAA_co2_data.length - 1]['CO2'];
 
 let co2_regression = [];
-for (let line of co2_data) {
+for (let line of NOAA_co2_data) {
 	co2_regression.push([line['date'], line['CO2']]);
 }
 let prediction = regression.polynomial(co2_regression, { order: 3, precision: 10 });
@@ -47,66 +66,86 @@ for (let year = latest_year; year <= predicted_year; year++) {
 	co2_prediction.push({'date': year, 'CO2': value});
 }
 
-const plot = Plot.line(co2_data, { x: 'date', y: 'CO2' }).plot({
-	x: { domain: [starting_year, predicted_year + 10], ticks: 10, tickFormat: d3.format('.0f'), labelArrow: 'none', label: '' },
-	y: { domain: [0, predicted_co2 + 50], ticks: 10, tickFormat: d3.format('.0f'), labelArrow: 'none', grid: true, label: 'CO2 [ppm]' },
-	marks: [
-		Plot.line(co2_prediction, { x: 'date', y: 'CO2', stroke: 'red' }),
-		Plot.link({length: 1}, { x1: starting_year, y1: latest_co2, x2: latest_year, y2: latest_co2, stroke: 'gray', strokeDasharray: '3 1' }),
-		Plot.link({length: 1}, { x1: latest_year, y1: 0, x2: latest_year, y2: latest_co2, stroke: 'gray', strokeDasharray: '3 1' }),
-		Plot.text([(Math.floor(latest_co2) + 'ppm | ' + Math.floor(latest_year)).toLocaleString(undefined, { useGrouping: false })], 
-		          { x: latest_year, y: latest_co2, dx: -32, dy: -6, lineAnchor: 'bottom' }),
-		Plot.link({length: 1}, { x1: starting_year, y1: predicted_co2, x2: predicted_year, y2: predicted_co2, stroke: 'gray', strokeDasharray: '3 1' }),
-		Plot.link({length: 1}, { x1: predicted_year, y1: 0, x2: predicted_year, y2: predicted_co2, stroke: 'gray', strokeDasharray: '3 1' }),
-		Plot.text([(Math.floor(predicted_co2) + 'ppm | ' + Math.floor(predicted_year)).toLocaleString(undefined, { useGrouping: false })], 
-		          { x: predicted_year, y: predicted_co2, dx: -35, dy: -6, lineAnchor: 'bottom' }),
-		Plot.text(['Atmospheric CO2 - prediction from globally averaged records'],
-		          { x: starting_year, y: -140, dx: -30, textAnchor: 'start', fill: 'black', fontWeight: 'bold' }),
-		Plot.text(['data:'],
-		          { x: predicted_year, y: -140, dx: -15, fill: 'black', fontWeight: 'bold' }),
-		Plot.text(['NOAA'],
-		          { x: predicted_year, y: -140, textAnchor: 'start', fill: 'rgb(0, 70, 127)', fontWeight: 'bold',
-				    href: d=>'https://gml.noaa.gov/ccgg/trends/gl_data.html' }),
-		Plot.dot(co2_data.concat(co2_prediction), 
-		         Plot.pointerX({ x: 'date', y: 'CO2', maxRadius: 0,
-		                         channels: { date: { value: 'date', label: 'Year:' }, CO2: { value: 'CO2', label: 'CO2 :' } },
-				                 tip: { anchor: 'top', pointerSize: '10', maxRadius: 100, textPadding: 6,
-				                        format: { x: false, y: false,
-							                      date: (d) => `${d3.format('.0f')(Math.floor(d))}`,
-							                      CO2: (d) => `${d3.format('.0f')(Math.floor(d))}ppm`,
-						                },
-				                 },
-				 })
-		),
-	],
-	height: '300',
-	width: '500',
-	marginTop: '15',
-	marginBottom: '40',
-	marginLeft: '45',
-	marginRight: '20',
-});
+function createPlot(starting_year) {
+	let plot = Plot.line(NOAA_co2_data, { x: 'date', y: 'CO2' }).plot({
+		x: { domain: [starting_year, predicted_year], ticks: 10, tickFormat: d3.format('.0f'), labelArrow: 'none', label: '' },
+		y: { domain: [0, predicted_co2 + 50], ticks: 10, tickFormat: d3.format('.0f'), labelArrow: 'none', grid: true, label: 'CO2 [ppm]' },
+		marks: [
+			Plot.dot(EDC3_co2_data, { x: 'date', y: 'CO2', fill: 'black', r: 1 }),
+			Plot.line(co2_prediction, { x: 'date', y: 'CO2', stroke: 'red' }),
+			Plot.link({length: 1}, { x1: starting_year, y1: latest_co2, x2: latest_year, y2: latest_co2, stroke: 'gray', strokeDasharray: '3 1' }),
+			Plot.link({length: 1}, { x1: latest_year, y1: 0, x2: latest_year, y2: latest_co2, stroke: 'gray', strokeDasharray: '3 1' }),
+			Plot.text([(Math.floor(latest_co2) + 'ppm | ' + Math.floor(latest_year)).toLocaleString(undefined, { useGrouping: false })], 
+					  { x: latest_year, y: latest_co2, dx: -40, dy: -6, lineAnchor: 'bottom' }),
+			Plot.link({length: 1}, { x1: starting_year, y1: predicted_co2, x2: predicted_year, y2: predicted_co2, stroke: 'gray', strokeDasharray: '3 1' }),
+			Plot.link({length: 1}, { x1: predicted_year, y1: 0, x2: predicted_year, y2: predicted_co2, stroke: 'gray', strokeDasharray: '3 1' }),
+			Plot.text([(Math.floor(predicted_co2) + 'ppm | ' + Math.floor(predicted_year)).toLocaleString(undefined, { useGrouping: false })], 
+					  { x: predicted_year, y: predicted_co2, dx: -40, dy: -6, lineAnchor: 'bottom' }),
+			Plot.text(['Atmospheric CO2 - prediction from globally averaged records'],
+					  { y: -140, dx: -250, textAnchor: 'start', fill: 'black', fontWeight: 'bold' }),
+			Plot.text(['data:'],
+					  { y: -140, dx: 175, fill: 'black', fontWeight: 'bold' }),
+			Plot.text(['NOAA'],
+					  { y: -140, dx: 190, textAnchor: 'start', fill: 'rgb(0, 70, 127)', fontWeight: 'bold',
+						href: d=>'https://gml.noaa.gov/ccgg/trends/gl_data.html' }),
+			Plot.dot(NOAA_co2_data.concat(co2_prediction).concat(EDC3_co2_data), 
+					 Plot.pointerX({ x: 'date', y: 'CO2', maxRadius: 0,
+									 channels: { date: { value: 'date', label: 'Year:' }, CO2: { value: 'CO2', label: 'CO2 :' } },
+									 tip: { anchor: 'top', pointerSize: '10', maxRadius: 100, textPadding: 6,
+											format: { x: false, y: false,
+													  date: (d) => `${d3.format('.0f')(Math.floor(d))}`,
+													  CO2: (d) => `${d3.format('.0f')(Math.floor(d))}ppm`,
+											},
+									 },
+					 })
+			),
+		],
+		height: '300',
+		width: '500',
+		marginTop: '15',
+		marginBottom: '40',
+		marginLeft: '45',
+		marginRight: '20',
+	});
+	return plot;
+}
 
 const div = document.querySelector('#plot');
-div.append(plot);
+div.append(createPlot(starting_year_EDC3));
 
-for (let node of document.querySelectorAll('text')) {
-	if (node.innerHTML.includes('CO2')) {
-		node.innerHTML = node.innerHTML.replace('CO2', 'CO&#8322;');
+setInterval(changeView, 3000);
+var view = 'historic';
+function changeView() {
+	if (view == 'historic') {
+		div.removeChild(div.firstChild);
+		div.append(createPlot(starting_year_NOAA));
+		view = 'prediction';
 	}
-}
-['mousemove', 'click'].forEach( function(event) {
-	document.querySelector('svg').addEventListener(event, () => {
-		let tip = document.querySelector('[aria-label="tip"]');
-		if (tip.children.length) {
-			for (let tspan of tip.querySelectorAll('tspan')) {
-				if (tspan.innerHTML.includes('CO2')) {
-					tspan.innerHTML = tspan.innerHTML.replace('CO2', 'CO&#8322;');
+	else if (view == 'prediction') {
+		div.removeChild(div.firstChild);
+		div.append(createPlot(starting_year_EDC3));
+		view = 'historic';
+	}
+
+	for (let node of document.querySelectorAll('text')) {
+		if (node.innerHTML.includes('CO2')) {
+			node.innerHTML = node.innerHTML.replace('CO2', 'CO&#8322;');
+		}
+	}
+	['mousemove', 'click'].forEach( function(event) {
+		document.querySelector('svg').addEventListener(event, () => {
+			let tip = document.querySelector('[aria-label="tip"]');
+			if (tip.children.length) {
+				for (let tspan of tip.querySelectorAll('tspan')) {
+					if (tspan.innerHTML.includes('CO2')) {
+						tspan.innerHTML = tspan.innerHTML.replace('CO2', 'CO&#8322;');
+					}
 				}
 			}
-		}
+		});
 	});
-});
+}
+changeView();
 
 </script>
 <style>
