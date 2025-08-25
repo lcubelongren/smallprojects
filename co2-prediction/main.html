@@ -6,8 +6,8 @@
 <script type="module">
 
 // source: https://doi.org/10.15138/9N0H-ZH07
-//const NOAA_url = 'https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_mm_gl.txt';
-const NOAA_url = 'data/archive/co2_mm_gl.txt';
+const NOAA_url = 'https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_mm_gl.txt';
+//const NOAA_url = 'data/archive/co2_mm_gl.txt';
 const NOAA_response = await fetch(NOAA_url);
 const NOAA_text = await NOAA_response.text();
 let NOAA_co2_data = [];
@@ -20,23 +20,23 @@ for (let line of NOAA_text.split('\n')) {
 }
 
 // source: https://doi.org/10.1038/nature06949
-//const EDC3_url = 'https://www.ncei.noaa.gov/pub/data/paleo/icecore/antarctica/epica_domec/edc3-composite-co2-2008-noaa.txt';
-const EDC3_url = 'data/archive/edc3-composite-co2-2008-noaa.txt';
-const EDC3_response = await fetch(EDC3_url);
-const EDC3_text = await EDC3_response.text();
-let EDC3_co2_data = [];
-for (let line of EDC3_text.split('\n')) {
+const EPICA_url = 'https://www.ncei.noaa.gov/pub/data/paleo/icecore/antarctica/epica_domec/edc3-composite-co2-2008-noaa.txt';
+//const EPICA_url = 'data/archive/edc3-composite-co2-2008-noaa.txt';
+const EPICA_response = await fetch(EPICA_url);
+const EPICA_text = await EPICA_response.text();
+let EPICA_co2_data = [];
+for (let line of EPICA_text.split('\n')) {
 	if (!(line[0] == '#') & line.length > 0) {
 		let line_data = line.split('\r')[0].split('\t');
 		let [year_BP, CO2] = line_data;
 		if (!isNaN(year_BP)) {
-			EDC3_co2_data.push({'date': (2008 - parseFloat(year_BP)), 'CO2': parseFloat(CO2)});
+			EPICA_co2_data.push({'date': (2008 - parseFloat(year_BP)), 'CO2': parseFloat(CO2)});
 		}
 	}
 }
 
-let starting_year_EDC3 = EDC3_co2_data[EDC3_co2_data.length - 1]['date'];
-let starting_year_NOAA = NOAA_co2_data[0]['date'];
+let starting_year_EPICA = EPICA_co2_data[EPICA_co2_data.length - 1]['date'] - 5000;
+let starting_year_NOAA = NOAA_co2_data[0]['date'] - 1;
 let latest_year = NOAA_co2_data[NOAA_co2_data.length - 1]['date'];
 let latest_co2 = NOAA_co2_data[NOAA_co2_data.length - 1]['CO2'];
 
@@ -68,10 +68,10 @@ for (let year = latest_year; year <= predicted_year; year++) {
 
 function createPlot(starting_year) {
 	let plot = Plot.line(NOAA_co2_data, { x: 'date', y: 'CO2' }).plot({
-		x: { domain: [starting_year, predicted_year], ticks: 10, tickFormat: d3.format('.0f'), labelArrow: 'none', label: '' },
-		y: { domain: [0, predicted_co2 + 50], ticks: 10, tickFormat: d3.format('.0f'), labelArrow: 'none', grid: true, label: 'CO2 [ppm]' },
+		x: { domain: [starting_year, predicted_year], ticks: 10, tickFormat: tickFormat_plot, labelArrow: 'none', label: '' },
+		y: { domain: [0, predicted_co2 + 50], ticks: 11, tickFormat: d3.format('.0f'), labelArrow: 'none', grid: true, label: 'CO2 [ppm]' },
 		marks: [
-			Plot.dot(EDC3_co2_data, { x: 'date', y: 'CO2', fill: 'black', r: 1 }),
+			Plot.dot(EPICA_co2_data, { x: 'date', y: 'CO2', fill: 'gray', r: 1 }),
 			Plot.line(co2_prediction, { x: 'date', y: 'CO2', stroke: 'red' }),
 			Plot.link({length: 1}, { x1: starting_year, y1: latest_co2, x2: latest_year, y2: latest_co2, stroke: 'gray', strokeDasharray: '3 1' }),
 			Plot.link({length: 1}, { x1: latest_year, y1: 0, x2: latest_year, y2: latest_co2, stroke: 'gray', strokeDasharray: '3 1' }),
@@ -81,24 +81,32 @@ function createPlot(starting_year) {
 			Plot.link({length: 1}, { x1: predicted_year, y1: 0, x2: predicted_year, y2: predicted_co2, stroke: 'gray', strokeDasharray: '3 1' }),
 			Plot.text([(Math.floor(predicted_co2) + 'ppm | ' + Math.floor(predicted_year)).toLocaleString(undefined, { useGrouping: false })], 
 					  { x: predicted_year, y: predicted_co2, dx: -40, dy: -6, lineAnchor: 'bottom' }),
-			Plot.text(['Atmospheric CO2 - prediction from globally averaged records'],
+			Plot.text(caption_plot,
 					  { y: -140, dx: -250, textAnchor: 'start', fill: 'black', fontWeight: 'bold' }),
 			Plot.text(['data:'],
-					  { y: -140, dx: 175, fill: 'black', fontWeight: 'bold' }),
+					  { y: -140, dx: 130, fill: 'black', fontWeight: 'bold' }),
 			Plot.text(['NOAA'],
+					  { y: -140, dx: 145, textAnchor: 'start', fill: 'rgb(0, 70, 127)', fontWeight: 'bold',
+						href: d=>'https://doi.org/10.15138/9N0H-ZH07' }),
+			Plot.text(['&'],
+					  { y: -140, dx: 182, fill: 'black', fontWeight: 'bold' }),
+			Plot.text(['EPICA'],
 					  { y: -140, dx: 190, textAnchor: 'start', fill: 'rgb(0, 70, 127)', fontWeight: 'bold',
-						href: d=>'https://gml.noaa.gov/ccgg/trends/gl_data.html' }),
-			Plot.dot(NOAA_co2_data.concat(co2_prediction).concat(EDC3_co2_data), 
+						href: d=>'https://www.nature.com/articles/nature06949' }),
+			Plot.dot(NOAA_co2_data.concat(co2_prediction).concat(EPICA_co2_data), 
 					 Plot.pointerX({ x: 'date', y: 'CO2', maxRadius: 0,
 									 channels: { date: { value: 'date', label: 'Year:' }, CO2: { value: 'CO2', label: 'CO2 :' } },
 									 tip: { anchor: 'top', pointerSize: '10', maxRadius: 100, textPadding: 6,
 											format: { x: false, y: false,
-													  date: (d) => `${d3.format('.0f')(Math.floor(d))}`,
+													  date: (d) => `${tickFormat_plot(Math.floor(d))}`,
 													  CO2: (d) => `${d3.format('.0f')(Math.floor(d))}ppm`,
 											},
 									 },
 					 })
 			),
+			Plot.text(button_transition,
+					  { y: 950, dx: -170, fill: 'rgb(0, 70, 127)', fontWeight: 'bold',
+					    className: 'transitionButton' }),
 		],
 		height: '300',
 		width: '500',
@@ -110,48 +118,97 @@ function createPlot(starting_year) {
 	return plot;
 }
 
-const div = document.querySelector('#plot');
-div.append(createPlot(starting_year_EDC3));
+function transitionPlots(initialYear, finalYear) {
+	let frames = 300;
+	for (let frame = 1; frame <= frames; frame++) {
+		setTimeout(function() {
+			let progress;
+			if (initialYear > 0) {
+				progress = (frame / frames) ** (4 / 1);
+			}
+			else {
+				progress = (frame / frames) ** (1 / 4);
+			}
+			let year = initialYear + (Math.floor(Math.abs(finalYear - initialYear) * progress) * Math.sign(finalYear));
+			let div = document.querySelector('#plot');
+			div.removeChild(div.firstChild);
+			div.append(createPlot(year));
+			fixSubscript();
+			addButton();
+		}, 100);
+	}
+}
 
-setInterval(changeView, 3000);
-var view = 'historic';
+let caption_prediction = ['Atmospheric CO2 - prediction from globally averaged air samples'];
+let caption_historic = ['Atmospheric CO2 - record from ice core samples'];
+
+let button_prediction = ['extend timeline'];
+let button_historic = ['shorten timeline'];
+
+let tickFormat_prediction = d3.format('.3~r');
+let tickFormat_historic = d3.format(',.3~r');
+
+var view = 'prediction';
+var caption_plot = caption_prediction;
+var button_transition = button_prediction;
+var tickFormat_plot = tickFormat_prediction;
 function changeView() {
 	if (view == 'historic') {
-		div.removeChild(div.firstChild);
-		div.append(createPlot(starting_year_NOAA));
 		view = 'prediction';
+		caption_plot = caption_prediction;
+		button_transition = button_prediction;
+		tickFormat_plot = tickFormat_prediction;
+		transitionPlots(starting_year_EPICA, starting_year_NOAA);
 	}
 	else if (view == 'prediction') {
-		div.removeChild(div.firstChild);
-		div.append(createPlot(starting_year_EDC3));
 		view = 'historic';
+		caption_plot = caption_historic;
+		button_transition = button_historic;
+		tickFormat_plot = tickFormat_historic;
+		transitionPlots(starting_year_NOAA, starting_year_EPICA);
 	}
+}
 
+let div = document.querySelector('#plot');
+div.append(createPlot(starting_year_NOAA));
+fixSubscript();
+addButton();
+
+['mousemove', 'click'].forEach( function(event) {
+	document.querySelector('svg').addEventListener(event, () => {
+		let tip = document.querySelector('[aria-label="tip"]');
+		if (tip.children.length) {
+			for (let tspan of tip.querySelectorAll('tspan')) {
+				if (tspan.innerHTML.includes('CO2')) {
+					tspan.innerHTML = tspan.innerHTML.replace('CO2', 'CO&#8322;');
+				}
+			}
+		}
+	});
+});
+
+function fixSubscript() {
 	for (let node of document.querySelectorAll('text')) {
 		if (node.innerHTML.includes('CO2')) {
 			node.innerHTML = node.innerHTML.replace('CO2', 'CO&#8322;');
 		}
 	}
-	['mousemove', 'click'].forEach( function(event) {
-		document.querySelector('svg').addEventListener(event, () => {
-			let tip = document.querySelector('[aria-label="tip"]');
-			if (tip.children.length) {
-				for (let tspan of tip.querySelectorAll('tspan')) {
-					if (tspan.innerHTML.includes('CO2')) {
-						tspan.innerHTML = tspan.innerHTML.replace('CO2', 'CO&#8322;');
-					}
-				}
-			}
-		});
+}
+
+function addButton() {
+	Array.from(document.getElementsByClassName('transitionButton')).forEach( function(button) {
+		button.addEventListener('click', function() {
+			changeView();
+		})
 	});
 }
-changeView();
 
 </script>
 <style>
 
 html, body {
 	margin: 0;
+	user-select: none;
 }
 
 #plot > svg {
@@ -163,6 +220,12 @@ html, body {
 
 a {
 	text-decoration: underline;
+}
+
+.transitionButton {
+	cursor: pointer;
+	text-decoration: underline;
+	border: 10px solid blue;
 }
 
 </style>
