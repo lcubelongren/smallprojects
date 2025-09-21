@@ -7,6 +7,7 @@
 
 // source: https://doi.org/10.15138/9N0H-ZH07
 const NOAA_url = 'https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_mm_gl.txt';
+//const NOAA_url = 'https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_mm_mlo.txt';
 //const NOAA_url = 'data/archive/co2_mm_gl.txt';
 const NOAA_response = await fetch(NOAA_url);
 const NOAA_text = await NOAA_response.text();
@@ -119,7 +120,7 @@ function createPlot(starting_year) {
 }
 
 function transitionPlots(initialYear, finalYear) {
-	let frames = 300;
+	let frames = 400;
 	for (let frame = 1; frame <= frames; frame++) {
 		setTimeout(function() {
 			let progress;
