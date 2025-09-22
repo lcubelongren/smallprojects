@@ -1,16 +1,19 @@
 <!DOCTYPE html>
+<body>
 <div id="titleText">South Pole Station Satellites</div>
+<table id="satelliteLegend"></table>
+<canvas id="canvasMap"></canvas>
+<canvas id="canvasCoverage"></canvas>
 <div id="timeText"></div>
-<input id="timeSlider" type="range" min="0" max="24" value="0" list="timeSliderList">
-<datalist id="timeSliderList">
-<option value="0" label="+0 hrs"></option>
-<option value="6" label="+6 hrs"></option>
+<datalist id="timeTicks">
+<option value="0" label="+00 hrs"></option>
+<option value="6" label="+06 hrs"></option>
 <option value="12" label="+12 hrs"></option>
 <option value="18" label="+18 hrs"></option>
 <option value="24" label="+24 hrs"></option>
 </datalist>
-<canvas id="canvasMap"></canvas>
-<canvas id="canvasCoverage"></canvas>
+<table id="timeSchedule"></table>
+</body>
 <script src="js/topojson.js"></script>
 <script src="js/d3.js"></script>
 <script src="js/satellite.js"></script>
@@ -44,6 +47,42 @@
 			'color': 'rgb(0 0 255 / 50%)',
 		},
 	}
+	
+	function satelliteCalculation(sat, time) {
+	
+		let tleLine1 = satellite_info[sat]['tleLine1'];
+		let tleLine2 = satellite_info[sat]['tleLine2'];
+		  
+		const satrec = satellite.twoline2satrec(tleLine1, tleLine2);
+		const positionAndVelocity = satellite.propagate(satrec, time);
+		const positionEci	= positionAndVelocity.position;
+		const gmst = satellite.gstime(time);
+		const positionGd = satellite.eciToGeodetic(positionEci, gmst);
+		const longitude = positionGd.longitude,
+			  latitude  = positionGd.latitude,
+			  height    = positionGd.height;
+		const longitudeDeg = satellite.degreesLong(longitude),
+			  latitudeDeg  = satellite.degreesLat(latitude);
+		
+		let radius_earth = 6357;  // [kilometer]
+		let circumference_earth = 40075;  // [kilometer]
+		let elevation_angle = 10;  // [degrees] above horizon
+
+		let satellite_lonlat = [longitudeDeg, latitudeDeg];
+		let satellite_coverage_radius = coverageRadius(circumference_earth, radius_earth, elevation_angle, height);			
+		function coverageRadius(c, r, e, h) {  // https://continuouswave.com/forum/viewtopic.php?t=2957
+			return [c * (180 - Math.asin(r * Math.sin(90 + e) / (r + h)) - (90 + e)) / 360];
+		}
+		
+		let satellite_geojson = {
+			'coordinates': [[0, -90], satellite_lonlat],
+			'type': 'LineString',
+		};
+		let satellite_distance = d3.geoLength(satellite_geojson) * radius_earth;
+		
+		return [satellite_lonlat, satellite_coverage_radius, satellite_distance];
+
+	}
 
 	async function loadData() {
 	
@@ -71,16 +110,19 @@
 		return [land_data, ocean_data, iceshelf_data];
 	}
 	let [land_data, ocean_data, iceshelf_data] = await loadData();
-	
-	//const scale = 100;
-	//const scale = 165;
-	const scale = 333;
+
+	function getScale() { return [Math.min(window.innerWidth, window.innerHeight) / 2.75]; }
+	var scale = getScale();
+
 	function drawMap() {
+	
+		scale = getScale();
 	
 		const canvas = document.getElementById('canvasMap');
 		const context = canvas.getContext('2d');
-		canvas.width = window.innerWidth;
-		canvas.height = window.innerHeight;
+		const canvas_size = Math.min(window.innerWidth, window.innerHeight);
+		canvas.width = canvas_size;
+		canvas.height = canvas_size;
 
 		//let projection = d3.geoTransverseMercator()
 		//let projection = d3.geoAzimuthalEqualArea()
@@ -103,8 +145,9 @@
 	
 		const canvas = document.getElementById('canvasCoverage');
 		const context = canvas.getContext('2d');
-		canvas.width = window.innerWidth;
-		canvas.height = window.innerHeight;
+		const canvas_size = Math.min(window.innerWidth, window.innerHeight);
+		canvas.width = canvas_size;
+		canvas.height = canvas_size;
 		
 		//let projection = d3.geoTransverseMercator()
 		//let projection = d3.geoAzimuthalEqualArea()
@@ -118,37 +161,8 @@
 		let southpole_fillColor;
 		for (let sat of Object.keys(satellite_info)) {
 
-			let tleLine1 = satellite_info[sat]['tleLine1'];
-			let tleLine2 = satellite_info[sat]['tleLine2'];
-			  
-			const satrec = satellite.twoline2satrec(tleLine1, tleLine2);
-			const positionAndVelocity = satellite.propagate(satrec, current_time);
-			const positionEci	= positionAndVelocity.position;
-			const gmst = satellite.gstime(current_time);
-			const positionGd = satellite.eciToGeodetic(positionEci, gmst);
-			const longitude = positionGd.longitude,
-				  latitude  = positionGd.latitude,
-				  height    = positionGd.height;
-			const longitudeDeg = satellite.degreesLong(longitude),
-				  latitudeDeg  = satellite.degreesLat(latitude);
-			
-			let radius_earth = 6357;  // [kilometer]
-			let circumference_earth = 40075;  // [kilometer]
-			let elevation_angle = 10;  // [degrees] above horizon
-
-			let satellite_lonlat = [longitudeDeg, latitudeDeg];
-			let satellite_coverage_radius = coverageRadius(circumference_earth, radius_earth, elevation_angle, height);			
-			function coverageRadius(c, r, e, h) {  // https://continuouswave.com/forum/viewtopic.php?t=2957
-				return [c * (180 - Math.asin(r * Math.sin(90 + e) / (r + h)) - (90 + e)) / 360];
-			}
-			
-			let satellite_geojson = {
-				'coordinates': [[0, -90], satellite_lonlat],
-				'type': 'LineString',
-			};
-			let satellite_distance = d3.geoLength(satellite_geojson) * radius_earth;
-
-			
+			let [satellite_lonlat, satellite_coverage_radius, satellite_distance] = satelliteCalculation(sat, current_time);
+	
 			if (satellite_coverage_radius > satellite_distance) {
 				southpole_fillColor = 'black';
 				let connection_line = { type: 'LineString', coordinates: [[0, -90], satellite_lonlat] };
@@ -187,63 +201,164 @@
 		drawCoverage();
 	});
 	
-	let timeSlider = document.getElementById('timeSlider');
-	timeSlider.addEventListener('input', function (event) {
-		current_time = new Date();
-		current_time.setTime(current_time.getTime() + ((60*60*1000) * timeSlider.value));
-		current_time.setMinutes(0);
-		current_time.setSeconds(0);
-		document.getElementById('timeText').innerText = current_time;
-		drawCoverage();
-	});
+	let satelliteLegend = document.getElementById('satelliteLegend');
+	let legend_html = '';
+	legend_html += '<tr>';
+	for (let sat of Object.keys(satellite_info)) {
+		legend_html += '<td><div style="background-color:' + satellite_info[sat]['color'] + '"></div><a>&nbsp;&nbsp;' + sat + '</a></td>';
+	}
+	legend_html += '</tr>';
+	satelliteLegend.innerHTML += legend_html;
+	
+	let timeSchedule = document.getElementById('timeSchedule');
+	for (let sat of Object.keys(satellite_info)) {
+		let row = '';
+		row += '<tr>';
+		for (let hr=0; hr <= 24; hr++) {
+			let target_time = new Date();
+			target_time.setTime(current_time.getTime() + ((60*60*1000) * hr));
+			target_time.setMinutes(0);
+			target_time.setSeconds(0);
+			let [satellite_lonlat, satellite_coverage_radius, satellite_distance] = satelliteCalculation(sat, target_time);
+			if (satellite_coverage_radius > satellite_distance) {
+				row += '<td class="' + hr + '" style="background-color:' + satellite_info[sat]['color'] + '"></td>';
+			}
+			else {
+				row += '<td class="' + hr + '" style="background-color:' + 'black' + '"></td>';
+			}
+		}
+		row += '</tr>';
+		timeSchedule.innerHTML += row;
+	}
+
+	var hr = '0';
+	let all_bins = document.getElementsByTagName('td');
+	for (let bin of all_bins) {
+		if (bin.offsetParent.id == 'timeSchedule') {
+			if (bin.className == hr) {
+				bin.style.opacity = '1.00';
+			}
+			else {
+				bin.style.opacity = '0.33';
+			}
+			bin.addEventListener('mouseenter', function (event) {
+				if (bin.className != hr) {
+					hr = bin.className;
+					for (let bin of all_bins) {
+						if (bin.offsetParent.id == 'timeSchedule') {
+							if (bin.className == hr) {
+								bin.style.opacity = '1.00';
+							}
+							else {
+								bin.style.opacity = '0.33';
+							}
+						}
+					}
+					current_time = new Date();
+					current_time.setTime(current_time.getTime() + ((60*60*1000) * hr));
+					current_time.setMinutes(0);
+					current_time.setSeconds(0);
+					document.getElementById('timeText').innerText = current_time;
+					drawCoverage();
+				}
+			});
+		}
+	}
 
 </script>
 <style>
 
-html, body {
+* {
+	font-family: sans-serif;
+}
+
+html {
+	display: grid;
+	align-content: center;
+	justify-content: center;
+	width: 100vw;
+	height: 100vh;
 	margin: 0;
 	overflow: hidden;
 	user-select: none;
+	background-color: black;
 }
 
 body {
-	width: 100vw;
-	height: 100vh;
+	position: relative;
+	width: 90vmin;
+	height: 90vmin;
+	margin: 0;
+	border: 5vmin solid black;
+	background-color: white;
+}
+
+#satelliteLegend {
+	position: absolute;
+	width: 50%;
+	margin: 0 25% 0 25%;
+	top: 4%;
+}
+#satelliteLegend > * > tr {
+	height: 2.5vmin;
+	text-align: center;
+}
+#satelliteLegend > * > tr > td > div {
+	display: inline-block;
+	vertical-align: middle;
+	height: 2.5vmin;
+	width: 2.5vmin;
+}
+#satelliteLegend > * > tr > td > a {
+	display: inline-block;
+	vertical-align: middle;
+	height: 2.5vmin;
+	line-height: 2.5vmin;
+	font-size: 2vmin;
 }
 
 #canvasMap, #canvasCoverage {
 	position: absolute;
 	width: 100%;
 	height: 100%;
-	top: 0;
+	transform: translateY(-5vmin);
 	pointer-events: none;
 }
 
 #titleText {
+	width: 100%;
 	text-align: center;
-	
+	font-size: 2.5vmin;
+	font-weight: bold;
+	color: white;
+	transform: translateY(-3.5vmin);
 }
 
 #timeText {
+	width: 100%;
 	text-align: center;
+	font-size: 2.5vmin;
+	color: white;
+	transform: translateY(88vmin);
 }
 
-#timeSlider {
+#timeTicks {
 	position: absolute;
-	width: 90vw;
-	margin-left: 5vw;
-	margin-right: 5vw;
-	accent-color: black;
-}
-
-#timeSliderList {
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
-	width: 90vw;
-	margin-left: 5vw;
-	margin-right: 5vw;
-	margin-top: 3vh;
+	width: 100%;
+	bottom: 9%;
+	font-size: 2vmin;
+}
+
+#timeSchedule {
+	position: absolute;
+	width: 100%;
+	bottom: 0;
+}
+#timeSchedule > * > tr {
+	height: 2.5vmin;
 }
 
 </style>
