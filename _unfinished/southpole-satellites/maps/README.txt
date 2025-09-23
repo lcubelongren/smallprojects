@@ -1,1 +1,1 @@
-https://github.com/martynafford/natural-earth-geojson/tree/master/110m/physical
+https://github.com/martynafford/natural-earth-geojson/tree/master
