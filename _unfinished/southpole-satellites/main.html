@@ -9,6 +9,8 @@
 A map of satellite coverage for the Amundsen-Scott South Pole Station,
 where the U.S. Antarctic Program (USAP) currently uses three satellites for communication.<br>
 <br>
+The station is considered within coverage when a satellite is at least 10&deg; above the horizon.<br>
+<br>
 For the definitive source of satellite service, see the 
 <a href="https://www.usap.gov/technology/1935/" target="_blank">official schedule</a>.<br>
 <br>
@@ -304,6 +306,8 @@ document.getElementById('loadingText').remove();
 }
 
 html {
+	display: grid;
+	justify-items: center;
 	width: 100vw;
 	height: 100vh;
 	margin: 0;
@@ -318,6 +322,7 @@ body {
 	height: 90vmin;
 	margin: 0;
 	border: 5vmin solid black;
+	align-self: center;
 	background-color: white;
 }
 
@@ -339,7 +344,7 @@ body {
 }
 #infoContainer.active {
 	width: 50vmin;
-	height: 35vmin;
+	height: 50vmin;
 }
 #infoIcon {
 	position: fixed;
