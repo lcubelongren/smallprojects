@@ -22,6 +22,8 @@ rev. 09/2025
 <table id="satelliteLegend"></table>
 <canvas id="canvasMap"></canvas>
 <canvas id="canvasCoverage"></canvas>
+<div id="panelMapContainer"></div>
+<div id="panelCoverageContainer"></div>
 <div id="timeText"></div>
 <datalist id="timeTicks">
 <option value="0" label="+00 hrs"></option>
@@ -34,24 +36,30 @@ rev. 09/2025
 </body>
 <script type="module">
 
+let dataLoaded = false;
+
 let current_time = new Date();
 current_time.setMinutes(0);
 current_time.setSeconds(0);
+current_time.setMilliseconds(0);
 document.getElementById('timeText').innerText = current_time;
 
 // TLEs obtained from: https://isstracker.pl/en/satellites
-const satellite_info = {
+let satellite_info = {
 	'TDRS-6': {  // https://isstracker.pl/en/satellites/22314
 		'NORAD_num': '22314',
 		'color': 'rgb(255 0 0 / 50%)',
+		'location_history': [],
 	},
 	'DSCS-11': {  // https://isstracker.pl/en/satellites/26575
 		'NORAD_num': '26575',
 		'color': 'rgb(0 255 0 / 50%)',
+		'location_history': [],
 	},
 	'DSCS-13': {  // https://isstracker.pl/en/satellites/25019
 		'NORAD_num': '25019',
 		'color': 'rgb(0 0 255 / 50%)',
+		'location_history': [],
 	},
 }
 async function loadTLE(sat) {
@@ -61,11 +69,20 @@ async function loadTLE(sat) {
 	let text = await request.text();
 	return text;
 }
-for (let sat of Object.keys(satellite_info)) {
-	let TLE = await loadTLE(sat);
-	satellite_info[sat]['tleLine1'] = TLE.split('\n')[1];
-	satellite_info[sat]['tleLine2'] = TLE.split('\n')[2];
+async function preparePage() {
+	for (let sat of Object.keys(satellite_info)) {
+		let TLE = await loadTLE(sat);
+		if (TLE.split('\n').length == 3) {
+			dataLoaded = true;
+		}
+		satellite_info[sat]['tleLine1'] = TLE.split('\n')[1];
+		satellite_info[sat]['tleLine2'] = TLE.split('\n')[2];
+		document.getElementById('panelMapContainer').innerHTML += '<canvas id="canvasMap_' + sat + '"></canvas>';
+		document.getElementById('panelCoverageContainer').innerHTML += '<canvas id="canvasCoverage_' + sat + '"></canvas>';
+	}
+	return satellite_info;
 }
+satellite_info = await preparePage();
 
 function satelliteCalculation(sat, time) {
 
@@ -132,14 +149,15 @@ let [land_data, ocean_data, iceshelf_data] = await loadData();
 
 function getScale() { return [Math.min(window.innerWidth, window.innerHeight) / 2.75]; }
 var scale = getScale();
+var panel_scale = scale * 0.25;
 
 function drawMap() {
 
 	scale = getScale();
 
-	const canvas = document.getElementById('canvasMap');
-	const context = canvas.getContext('2d');
-	const canvas_size = Math.min(window.innerWidth, window.innerHeight);
+	let canvas = document.getElementById('canvasMap');
+	let context = canvas.getContext('2d');
+	let canvas_size = Math.min(window.innerWidth, window.innerHeight);
 	canvas.width = canvas_size;
 	canvas.height = canvas_size;
 
@@ -155,14 +173,37 @@ function drawMap() {
 	context.beginPath(), path(land_data), context.fillStyle='#ffffff', context.fill();
 	context.beginPath(), path(land_data), context.strokeStyle='#000000', context.lineWidth=0.5, context.stroke();
 	
+	for (let panel_canvas of document.getElementById('panelMapContainer').children) {
+
+		let panel_context = panel_canvas.getContext('2d');
+		let panel_canvas_size = document.getElementById('panelMapContainer').offsetWidth;
+		panel_canvas.width = panel_canvas_size;
+		panel_canvas.height = panel_canvas_size;
+
+		let panel_sat = panel_canvas.id.split('_')[1];
+		let [satellite_lonlat, satellite_coverage_radius, satellite_distance] = satelliteCalculation(panel_sat, current_time);
+
+		let panel_projection = d3.geoEquirectangular()
+		.rotate([-satellite_lonlat[0], -satellite_lonlat[1]])
+		.scale(panel_scale)
+		.translate([panel_canvas.width / 2, panel_canvas.height / 2]);
+		
+		let panel_path = d3.geoPath(panel_projection, panel_context);
+
+		panel_context.beginPath(), panel_path(ocean_data), panel_context.fillStyle='#adcfe6', panel_context.fill();
+		panel_context.beginPath(), panel_path(iceshelf_data), panel_context.fillStyle='#e8f4f8', panel_context.fill();
+		panel_context.beginPath(), panel_path(land_data), panel_context.fillStyle='#ffffff', panel_context.fill();
+		panel_context.beginPath(), panel_path(land_data), panel_context.strokeStyle='#000000', panel_context.lineWidth=0.5, panel_context.stroke();
+		
+	}
+	
 }
-drawMap();
 
 function drawCoverage() {
 
-	const canvas = document.getElementById('canvasCoverage');
-	const context = canvas.getContext('2d');
-	const canvas_size = Math.min(window.innerWidth, window.innerHeight);
+	let canvas = document.getElementById('canvasCoverage');
+	let context = canvas.getContext('2d');
+	let canvas_size = Math.min(window.innerWidth, window.innerHeight);
 	canvas.width = canvas_size;
 	canvas.height = canvas_size;
 
@@ -207,13 +248,67 @@ function drawCoverage() {
 	context.beginPath(), path(southpole()), context.fillStyle=southpole_fillColor, context.fill();
 	context.beginPath(), path(southpole()), context.strokeStyle='black', context.lineWidth=1.5, context.stroke();
 	
-}
-drawMap();
-drawCoverage();
+	for (let panel_canvas of document.getElementById('panelCoverageContainer').children) {
+	
+		let panel_context = panel_canvas.getContext('2d');
+		let panel_canvas_size = document.getElementById('panelCoverageContainer').offsetWidth;
+		panel_canvas.width = panel_canvas_size;
+		panel_canvas.height = panel_canvas_size;	
 
-window.addEventListener('resize', function (event) {
+		let panel_sat = panel_canvas.id.split('_')[1];
+		let [satellite_lonlat, satellite_coverage_radius, satellite_distance] = satelliteCalculation(panel_sat, current_time);
+		let lonlat_exists = false;
+		for (let lonlat of satellite_info[panel_sat]['location_history']) {
+			if ((lonlat[0] == satellite_lonlat[0]) & (lonlat[1] == satellite_lonlat[1])) {
+				lonlat_exists = true;
+			}
+		}
+		if (lonlat_exists == false) {
+			satellite_info[panel_sat]['location_history'].push(satellite_lonlat);
+		}
+		console.log(satellite_info[panel_sat]['location_history'])
+		
+		let fixed_current_time = new Date();
+		fixed_current_time.setMinutes(0);
+		fixed_current_time.setSeconds(0);
+		let fixed_satellite_lonlat = satelliteCalculation(panel_sat, fixed_current_time)[0];
+		
+		let panel_projection = d3.geoEquirectangular()
+		.rotate([-fixed_satellite_lonlat[0], -fixed_satellite_lonlat[1]])
+		.scale(panel_scale)
+		.translate([panel_canvas.width / 2, panel_canvas.height / 2]);
+		
+		let panel_path = d3.geoPath(panel_projection, panel_context);
+
+		if (satellite_coverage_radius > satellite_distance) {
+			let connection_line = { type: 'LineString', coordinates: [[0, -90], satellite_lonlat] };
+			panel_context.beginPath(), panel_path(connection_line), panel_context.strokeStyle=satellite_info[panel_sat]['color'], panel_context.lineWidth=2.5, panel_context.stroke();
+		}
+		else {
+		}
+		
+		let history_line = { type: 'LineString', coordinates: satellite_info[panel_sat]['location_history'] };
+		panel_context.beginPath(), panel_path(history_line), panel_context.strokeStyle='#000000', panel_context.lineWidth=1.0, panel_context.stroke();
+
+		let panel_satellite_center = d3.geoCircle()
+		.center(satellite_lonlat)
+		.radius(1500 / (panel_scale * (Math.PI * 2)));
+		panel_context.beginPath(), panel_path(panel_satellite_center()), panel_context.fillStyle=satellite_info[panel_sat]['color'], panel_context.fill();
+		
+	}
+	
+}
+
+if (dataLoaded) {
 	drawMap();
 	drawCoverage();
+}
+
+window.addEventListener('resize', function (event) {
+	if (dataLoaded) {
+		drawMap();
+		drawCoverage();
+	}
 });
 
 let infoContainer = document.getElementById('infoContainer');
@@ -284,19 +379,27 @@ for (let bin of all_bins) {
 				current_time.setTime(current_time.getTime() + ((60*60*1000) * hr));
 				current_time.setMinutes(0);
 				current_time.setSeconds(0);
+				current_time.setMilliseconds(0);
 				document.getElementById('timeText').innerText = current_time;
 				drawCoverage();
 			}
 		});
 	}
 }
-	
-infoContainer.style.visibility = 'visible';
-satelliteLegend.style.visibility = 'visible';
-timeText.style.visibility = 'visible';
-timeTicks.style.visibility = 'visible';
-timeSchedule.style.visibility = 'visible';
-document.getElementById('loadingText').remove();
+
+if (dataLoaded) {
+	infoContainer.style.visibility = 'visible';
+	satelliteLegend.style.visibility = 'visible';
+	timeText.style.visibility = 'visible';
+	timeTicks.style.visibility = 'visible';
+	timeSchedule.style.visibility = 'visible';
+	document.getElementById('panelMapContainer').style.visibility = 'visible';
+	document.getElementById('panelCoverageContainer').style.visibility = 'visible';
+	document.getElementById('loadingText').remove();
+}
+else {
+	document.getElementById('loadingText').innerHTML = 'connection to server failed,<br>please try again later';
+}
 
 </script>
 <style>
@@ -385,10 +488,28 @@ body {
 
 #canvasMap, #canvasCoverage {
 	position: absolute;
-	width: 100%;
-	height: 100%;
-	transform: translateY(-5vmin);
+	width: 80%;
+	height: auto;
+	top: 7%;
+	right: 0;
 	pointer-events: none;
+}
+#panelMapContainer, #panelCoverageContainer {
+	position: absolute;
+	width: 20%;
+	height: 65%;
+	left: 4%;
+	top: 0;
+	margin: 14.5% 0 20.5% 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	visibility: hidden;
+}
+#panelMapContainer > canvas, #panelCoverageContainer > canvas {
+	width: 100%;
+	height: auto;
+	outline: 0.25vmin solid black;
 }
 
 #titleText {
