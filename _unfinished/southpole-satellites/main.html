@@ -72,7 +72,7 @@ async function loadTLE(sat) {
 async function preparePage() {
 	for (let sat of Object.keys(satellite_info)) {
 		let TLE = await loadTLE(sat);
-		if (TLE.split('\n').length == 3) {
+		if (TLE.split('\n').length == 4) {
 			dataLoaded = true;
 		}
 		satellite_info[sat]['tleLine1'] = TLE.split('\n')[1];
@@ -82,7 +82,7 @@ async function preparePage() {
 	}
 	return satellite_info;
 }
-satellite_info = await preparePage();
+await preparePage();
 
 function satelliteCalculation(sat, time) {
 
@@ -147,13 +147,15 @@ async function loadData() {
 }
 let [land_data, ocean_data, iceshelf_data] = await loadData();
 
-function getScale() { return [Math.min(window.innerWidth, window.innerHeight) / 2.75]; }
+function getScale() { return Math.min(window.innerWidth, window.innerHeight) / 2.75; }
 var scale = getScale();
-var panel_scale = scale * 0.25;
+function getPanelScale() { return Math.min(document.getElementById('panelMapContainer').offsetWidth, document.getElementById('panelMapContainer').offsetHeight) / 1.5; }
+var panel_scale = getPanelScale();
 
 function drawMap() {
 
 	scale = getScale();
+	panel_scale = getPanelScale();
 
 	let canvas = document.getElementById('canvasMap');
 	let context = canvas.getContext('2d');
@@ -165,6 +167,8 @@ function drawMap() {
 	.rotate([0, 90])
 	.scale(scale)
 	.translate([canvas.width / 2, canvas.height / 2]);
+	
+	let outline = { type: 'Sphere' };
 
 	let path = d3.geoPath(projection, context);
 
@@ -172,6 +176,7 @@ function drawMap() {
 	context.beginPath(), path(iceshelf_data), context.fillStyle='#e8f4f8', context.fill();
 	context.beginPath(), path(land_data), context.fillStyle='#ffffff', context.fill();
 	context.beginPath(), path(land_data), context.strokeStyle='#000000', context.lineWidth=0.5, context.stroke();
+	context.beginPath(), path(outline), context.strokeStyle='#000000', context.lineWidth=1.0, context.stroke();
 	
 	for (let panel_canvas of document.getElementById('panelMapContainer').children) {
 
@@ -184,7 +189,7 @@ function drawMap() {
 		let [satellite_lonlat, satellite_coverage_radius, satellite_distance] = satelliteCalculation(panel_sat, current_time);
 
 		let panel_projection = d3.geoEquirectangular()
-		.rotate([-satellite_lonlat[0], -satellite_lonlat[1]])
+		.center(satellite_lonlat)
 		.scale(panel_scale)
 		.translate([panel_canvas.width / 2, panel_canvas.height / 2]);
 		
@@ -193,7 +198,7 @@ function drawMap() {
 		panel_context.beginPath(), panel_path(ocean_data), panel_context.fillStyle='#adcfe6', panel_context.fill();
 		panel_context.beginPath(), panel_path(iceshelf_data), panel_context.fillStyle='#e8f4f8', panel_context.fill();
 		panel_context.beginPath(), panel_path(land_data), panel_context.fillStyle='#ffffff', panel_context.fill();
-		panel_context.beginPath(), panel_path(land_data), panel_context.strokeStyle='#000000', panel_context.lineWidth=0.5, panel_context.stroke();
+		panel_context.beginPath(), panel_path(land_data), panel_context.strokeStyle='#000000', panel_context.lineWidth=0.8, panel_context.stroke();
 		
 	}
 	
@@ -237,8 +242,8 @@ function drawCoverage() {
 
 		let satellite_center = d3.geoCircle()
 		.center(satellite_lonlat)
-		.radius(1000 / (scale * (Math.PI * 2)));
-		context.beginPath(), path(satellite_center()), context.fillStyle='black', context.fill();
+		.radius(3000 / (scale * (Math.PI * 2)));
+		context.beginPath(), path(satellite_center()), context.fillStyle=satellite_info[sat]['color'], context.fill();
 		
 	}
 
@@ -257,43 +262,42 @@ function drawCoverage() {
 
 		let panel_sat = panel_canvas.id.split('_')[1];
 		let [satellite_lonlat, satellite_coverage_radius, satellite_distance] = satelliteCalculation(panel_sat, current_time);
-		let lonlat_exists = false;
-		for (let lonlat of satellite_info[panel_sat]['location_history']) {
-			if ((lonlat[0] == satellite_lonlat[0]) & (lonlat[1] == satellite_lonlat[1])) {
-				lonlat_exists = true;
-			}
-		}
-		if (lonlat_exists == false) {
-			satellite_info[panel_sat]['location_history'].push(satellite_lonlat);
-		}
-		console.log(satellite_info[panel_sat]['location_history'])
-		
+
 		let fixed_current_time = new Date();
 		fixed_current_time.setMinutes(0);
 		fixed_current_time.setSeconds(0);
 		let fixed_satellite_lonlat = satelliteCalculation(panel_sat, fixed_current_time)[0];
 		
 		let panel_projection = d3.geoEquirectangular()
-		.rotate([-fixed_satellite_lonlat[0], -fixed_satellite_lonlat[1]])
+		.center(fixed_satellite_lonlat)
 		.scale(panel_scale)
 		.translate([panel_canvas.width / 2, panel_canvas.height / 2]);
 		
 		let panel_path = d3.geoPath(panel_projection, panel_context);
+		
+		let panel_satellite_color = satellite_info[panel_sat]['color'].split('/')[0] + ')';
 
+		let panel_satellite_fillColor;
 		if (satellite_coverage_radius > satellite_distance) {
+			panel_satellite_fillColor = panel_satellite_color;
 			let connection_line = { type: 'LineString', coordinates: [[0, -90], satellite_lonlat] };
-			panel_context.beginPath(), panel_path(connection_line), panel_context.strokeStyle=satellite_info[panel_sat]['color'], panel_context.lineWidth=2.5, panel_context.stroke();
+			panel_context.beginPath(), panel_path(connection_line), panel_context.strokeStyle=panel_satellite_color, panel_context.lineWidth=2.5, panel_context.stroke();
 		}
 		else {
+			if (panel_satellite_fillColor == undefined) {
+				panel_satellite_fillColor = 'white';
+			}
 		}
 		
-		let history_line = { type: 'LineString', coordinates: satellite_info[panel_sat]['location_history'] };
+		let history_coordinates = satellite_info[panel_sat]['location_history'].slice(0, Number.parseInt(hr) + 1);
+		let history_line = { type: 'LineString', coordinates: history_coordinates };
 		panel_context.beginPath(), panel_path(history_line), panel_context.strokeStyle='#000000', panel_context.lineWidth=1.0, panel_context.stroke();
 
 		let panel_satellite_center = d3.geoCircle()
 		.center(satellite_lonlat)
 		.radius(1500 / (panel_scale * (Math.PI * 2)));
-		panel_context.beginPath(), panel_path(panel_satellite_center()), panel_context.fillStyle=satellite_info[panel_sat]['color'], panel_context.fill();
+		panel_context.beginPath(), panel_path(panel_satellite_center()), panel_context.fillStyle=panel_satellite_fillColor, panel_context.fill();
+		panel_context.beginPath(), panel_path(panel_satellite_center()), panel_context.strokeStyle=panel_satellite_color, panel_context.lineWidth=1.5, panel_context.stroke();
 		
 	}
 	
@@ -341,6 +345,7 @@ for (let sat of Object.keys(satellite_info)) {
 		target_time.setMinutes(0);
 		target_time.setSeconds(0);
 		let [satellite_lonlat, satellite_coverage_radius, satellite_distance] = satelliteCalculation(sat, target_time);
+		satellite_info[sat]['location_history'].push(satellite_lonlat)
 		if (satellite_coverage_radius > satellite_distance) {
 			row += '<td class="' + hr + '" style="background-color:' + satellite_info[sat]['color'] + '"></td>';
 		}
