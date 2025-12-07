@@ -9,34 +9,44 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
 
-## to download from Google Maps (as of 2025.07.03)
-## Settings -> Google location settings -> Location services -> Timeline -> Export Timeline data
-fname = 'data/Timeline_20250703.json'
+## to download from Google Maps
+## (Android) Settings -> Google location settings -> Location services -> Timeline -> Export Timeline data
+## (iOS)
+fnames_dict = {
+    'Android': 'data/Timeline_20250703.json',
+    'iOS': 'data/location-history_20251206.json'
+}
 
-
-def gps(fname):
-    with open(fname) as f:
-        data = json.load(f)
-        lats = []
-        lons = []
-        times = []
-        for entry in data['semanticSegments']:
-            # if 'timelinePath' in entry:
-                # for timelinePath in entry['timelinePath']:
-                    # lat, lon = timelinePath['point'].split(', ')
-                    # time = timelinePath['time']
-                    # lats.append(float(lat[:-2]))
-                    # lons.append(float(lon[:-2]))
-                    # times.append(datetime.datetime.strptime(time[:19], '%Y-%m-%dT%H:%M:%S'))
-            if 'activity' in entry:
-                activity = entry['activity']
-                if not activity['topCandidate']['type'] in ['UNKNOWN', 'UNKNOWN_ACTIVITY_TYPE']:
-                    for se in ['start', 'end']:
-                        lat, lon = activity[se]['latLng'].split(', ')
-                        time = entry[se + 'Time']
-                        lats.append(float(lat[:-2]))
-                        lons.append(float(lon[:-2]))
-                        times.append(datetime.datetime.strptime(time[:19], '%Y-%m-%dT%H:%M:%S'))
+def gps(fnames_dict):
+    lats = []
+    lons = []
+    times = []
+    for software in fnames_dict.keys():
+        fname = fnames_dict[software]
+        with open(fname) as f:
+            data = json.load(f)
+            if software == 'Android':
+                data = data['semanticSegments']
+            for entry in data:
+                # if 'timelinePath' in entry:
+                    # for timelinePath in entry['timelinePath']:
+                        # lat, lon = timelinePath['point'].split(', ')
+                        # time = timelinePath['time']
+                        # lats.append(float(lat[:-2]))
+                        # lons.append(float(lon[:-2]))
+                        # times.append(datetime.datetime.strptime(time[:19], '%Y-%m-%dT%H:%M:%S'))
+                if 'activity' in entry:
+                    activity = entry['activity']
+                    if not activity['topCandidate']['type'] in ['UNKNOWN', 'UNKNOWN_ACTIVITY_TYPE', 'flying']:
+                        for se in ['start', 'end']:
+                            if software == 'Android':
+                                lat, lon = activity[se]['latLng'].split(', ')
+                            if software == 'iOS':
+                                lat, lon = activity[se].split('geo:')[-1].split(',')
+                            time = entry[se + 'Time']
+                            lats.append(float(lat[:-2]))
+                            lons.append(float(lon[:-2]))
+                            times.append(datetime.datetime.strptime(time[:19], '%Y-%m-%dT%H:%M:%S'))
     return lats, lons, times
 
 
@@ -89,6 +99,6 @@ def mapping(lats, lons, times):
 
 
 if __name__ == '__main__':
-    lats, lons, times = gps(fname)
+    lats, lons, times = gps(fnames_dict)
     #lats, lons, times = [40],[20],[datetime.datetime.now()]
     mapping(lats, lons, times)
