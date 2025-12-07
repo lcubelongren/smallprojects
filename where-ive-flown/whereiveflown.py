@@ -13,7 +13,7 @@ from pyairports.airports import Airports
 airports = Airports()
 
 
-img_dir = r'E:\Projects\collections\Boarding Passes'
+img_dir = r'D:\Projects\collections\Boarding Passes'
 missing_fname = '.\missing_list.txt'
 
 def boarding_passes(img_dir):
@@ -46,6 +46,7 @@ def mapping(origins, destinations, dates):
     ax.add_feature(cartopy.feature.LAND, color='black', zorder=1)
     ax.add_feature(cartopy.feature.LAKES, color='grey', zorder=2)
     ax.add_feature(cartopy.feature.BORDERS, edgecolor='white', linewidth=0.1, zorder=3)
+    ax.add_feature(cartopy.feature.STATES, edgecolor='white', linewidth=0.1, zorder=4)
     ax.gridlines(xlocs=np.array([-90, 0, 90, 180])-135+twist, ylocs=[], linewidth=0.5, color='w', zorder=4)
 
     times = [datetime.datetime.strptime(date, '%Y%m%d') for date in dates]
