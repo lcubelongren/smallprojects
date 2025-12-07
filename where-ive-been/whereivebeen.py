@@ -9,13 +9,14 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
 
-## to download from Google Maps
-## (Android) Settings -> Google location settings -> Location services -> Timeline -> Export Timeline data
-## (iOS)
+## to obtain location data from Google Maps
+## (Android) Settings app -> Google location settings -> Location services -> Timeline -> Export Timeline data
+## (iOS) Google Maps app -> Your Timeline -> Location & privacy settings -> Export Timeline data
 fnames_dict = {
     'Android': 'data/Timeline_20250703.json',
     'iOS': 'data/location-history_20251206.json'
 }
+
 
 def gps(fnames_dict):
     lats = []
@@ -28,16 +29,10 @@ def gps(fnames_dict):
             if software == 'Android':
                 data = data['semanticSegments']
             for entry in data:
-                # if 'timelinePath' in entry:
-                    # for timelinePath in entry['timelinePath']:
-                        # lat, lon = timelinePath['point'].split(', ')
-                        # time = timelinePath['time']
-                        # lats.append(float(lat[:-2]))
-                        # lons.append(float(lon[:-2]))
-                        # times.append(datetime.datetime.strptime(time[:19], '%Y-%m-%dT%H:%M:%S'))
                 if 'activity' in entry:
                     activity = entry['activity']
-                    if not activity['topCandidate']['type'] in ['UNKNOWN', 'UNKNOWN_ACTIVITY_TYPE', 'flying']:
+                    excluded_types = ['UNKNOWN', 'UNKNOWN_ACTIVITY_TYPE', 'IN_FERRY', 'FLYING', 'flying']
+                    if not activity['topCandidate']['type'] in excluded_types:
                         for se in ['start', 'end']:
                             if software == 'Android':
                                 lat, lon = activity[se]['latLng'].split(', ')
@@ -50,29 +45,12 @@ def gps(fnames_dict):
     return lats, lons, times
 
 
-def gps_OLD(fname):
-    with open(fname) as f:
-        data = json.load(f)
-        lats = []
-        lons = []
-        times = []
-        for entry in data['locations']:
-            if entry['source'] in ['GPS', 'CELL', 'WIFI', 'UNKNOWN']:
-                lat, lon, time = entry['latitudeE7'], entry['longitudeE7'], entry['timestamp']
-                lats.append(lat/1e7)
-                lons.append(lon/1e7)
-                times.append(datetime.datetime.strptime(time[:19], '%Y-%m-%dT%H:%M:%S'))
-            else:
-                print(entry['source'])
-    return lats, lons, times
-
-
 def mapping(lats, lons, times):
     plt.figure(figsize=(16,9), dpi=300)
     
     twist = 67
     projection = ccrs.RotatedPole(pole_longitude=twist,           # twist things around both poles
-                                  pole_latitude =    0,           # shift poles, centered up and down
+                                  pole_latitude=0,                # shift poles, centered up and down
                                   central_rotated_longitude=-33)  # shift poles to be at left and right
     ax = plt.axes(projection=projection)
     ax.set_global()
@@ -81,6 +59,7 @@ def mapping(lats, lons, times):
     ax.add_feature(cartopy.feature.LAND, color='black', zorder=1)
     ax.add_feature(cartopy.feature.LAKES, color='grey', zorder=2)
     ax.add_feature(cartopy.feature.BORDERS, edgecolor='white', linewidth=0.1, zorder=3)
+    ax.add_feature(cartopy.feature.STATES, edgecolor='white', linewidth=0.1, zorder=4)
     ax.gridlines(xlocs=np.array([-90, 0, 90, 180])-135+twist, ylocs=[], linewidth=0.5, color='w', zorder=4)
     
     timedelta = [(time - times[0]).total_seconds() for time in times]
@@ -100,5 +79,4 @@ def mapping(lats, lons, times):
 
 if __name__ == '__main__':
     lats, lons, times = gps(fnames_dict)
-    #lats, lons, times = [40],[20],[datetime.datetime.now()]
     mapping(lats, lons, times)
