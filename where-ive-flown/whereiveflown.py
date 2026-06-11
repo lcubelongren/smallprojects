@@ -3,18 +3,27 @@ import datetime
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import cartopy
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib as mpl
 
-from pyairports.airports import Airports
-airports = Airports()
 
+# https://ourairports.com/data/
+airports_csv = pd.read_csv(r'/media/longren/Lloyd Main/Projects/collections/other/airports-edited.csv',
+                           usecols=['iata_code', 'longitude_deg', 'latitude_deg'])
+airports = {}
+for i in range(len(airports_csv)):
+    iata = airports_csv.at[i, 'iata_code']
+    if not pd.isna(iata):
+        airports[iata] = {}
+        airports[iata]['lon'] = airports_csv.at[i, 'longitude_deg']
+        airports[iata]['lat'] = airports_csv.at[i, 'latitude_deg']
 
-img_dir = r'D:\Projects\collections\Boarding Passes'
-missing_fname = '.\missing_list.txt'
+img_dir = r'/media/longren/Lloyd Main/Projects/collections/Boarding Passes'
+missing_fname = 'missing_list.txt'
 
 def boarding_passes(img_dir):
     img_list = [str(x.stem) for x in Path(img_dir).glob('*_001.png')]
@@ -55,10 +64,16 @@ def mapping(origins, destinations, dates):
     colors = cmap(timedeltas / np.max(timedeltas))
     for origin,destination,color in zip(origins, destinations, colors):
         if len(origin) == 3:  # IATA
-            origin_lat = float(airports.airport_iata(origin).lat)
-            origin_lon = float(airports.airport_iata(origin).lon)
-            destination_lat = float(airports.airport_iata(destination).lat)
-            destination_lon = float(airports.airport_iata(destination).lon)
+            try:
+                origin_lat = float(airports[origin]['lat'])
+                origin_lon = float(airports[origin]['lon'])
+            except:
+                print('missing:', origin)
+            try:
+                destination_lat = float(airports[destination]['lat'])
+                destination_lon = float(airports[destination]['lon'])
+            except:
+                print('missing:', destination)
         else:  # already lat, lon
             origin_lat = float(origin.split(',')[0])
             origin_lon = float(origin.split(',')[1])
