@@ -13,3 +13,8 @@ data
 *.dcm
 *.nii
 *.tif
+
+# noaa-aircraft
+data-flightradar24
+webpages-flightradar24
+unused
